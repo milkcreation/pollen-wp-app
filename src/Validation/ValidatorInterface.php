@@ -1,0 +1,57 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Pollen\WpApp\Validation;
+
+use Respect\Validation\Exceptions\ComponentException;
+use Respect\Validation\Rules\AllOf;
+use Respect\Validation\Validatable;
+/**
+ * @method static Rules\PasswordRule password(array $args = [])
+ * @method static Rules\SerializedRule serialized(bool $strict = true)
+ * @mixin AllOf
+ */
+interface ValidatorInterface
+{
+    /**
+     * Creates a new Validator instance with a rule that was called on the static method.
+     *
+     * @param string $ruleName
+     * @param mixed[] $arguments
+     *
+     * @return static
+     *
+     * @throws ComponentException
+     */
+    public static function __callStatic(string $ruleName, array $arguments): ValidatorInterface;
+
+    /**
+     * Create a new rule by the name of the method and adds the rule to the chain.
+     *
+     * @param string $ruleName
+     * @param mixed[] $arguments
+     *
+     * @return static
+     *
+     * @throws ComponentException
+     */
+    public function __call(string $ruleName, array $arguments): ValidatorInterface;
+
+    /**
+     * Création d'une instance de validation.
+     *
+     * @return static
+     */
+    public static function create(): ValidatorInterface;
+
+    /**
+     * Définition d'une régle personnalisée.
+     *
+     * @param string $name
+     * @param Validatable $rule
+     *
+     * @return static
+     */
+    public function setCustomRule(string $name, Validatable $rule): ValidatorInterface;
+}

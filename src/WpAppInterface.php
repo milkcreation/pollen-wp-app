@@ -7,6 +7,7 @@ namespace Pollen\WpApp;
 use Pollen\WpApp\Container\Container;
 use Pollen\WpApp\Http\RequestInterface;
 use Pollen\WpApp\Routing\RouterInterface;
+use Pollen\WpApp\Validation\ValidatorInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 
@@ -58,4 +59,11 @@ interface WpAppInterface
      * @return RouterInterface|null
      */
     public function router(): ?RouterInterface;
+
+    /**
+     * Instance du gestionnaire de validation.
+     *
+     * @return ValidatorInterface|null
+     */
+    public function validator(): ?ValidatorInterface;
 }

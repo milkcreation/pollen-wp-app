@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Partial;
 
+use BadMethodCallException;
+use Error;
 use Pollen\WpApp\Support\Concerns\ParamsBagTrait;
 use Pollen\WpApp\View\ViewEngine;
 use Pollen\WpApp\View\ViewEngineInterface;
 
+/**
+ * @mixin \Pollen\WpApp\Support\ParamsBag
+ */
 abstract class AbstractPartialDriver
 {
     use ParamsBagTrait;
@@ -16,6 +21,30 @@ abstract class AbstractPartialDriver
      * @var ViewEngineInterface|null
      */
     protected $viewEngine;
+
+    /**
+     * Délégation d'appel des méthodes du ParamBag.
+     *
+     * @param string $method
+     * @param array $arguments
+     *
+     * @return mixed
+     */
+    public function __call(string $method, array $arguments)
+    {
+        try {
+            return $this->params()->{$method}(...$arguments);
+        } catch (Error $e) {
+            throw new BadMethodCallException(
+                sprintf(
+                    'PartialDriver [%s] method call [%s] throws an exception: %s',
+                    get_class(),
+                    $method,
+                    $e->getMessage()
+                )
+            );
+        }
+    }
 
     /**
      * Résolution de sortie de la classe sous forme de chaîne de caractères.
@@ -34,7 +63,7 @@ abstract class AbstractPartialDriver
      */
     public function render(): string
     {
-        return $this->view('index', $this->params()->all());
+        return $this->view('index', $this->all());
     }
 
     /**
