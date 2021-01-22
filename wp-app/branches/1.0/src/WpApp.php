@@ -12,6 +12,8 @@ use Pollen\WpApp\Support\Concerns\ConfigBagTrait;
 use Pollen\WpApp\Support\Concerns\ContainerAwareTrait;
 use Pollen\WpApp\Routing\RoutingServiceProvider;
 use Pollen\WpApp\Routing\RouterInterface;
+use Pollen\WpApp\Validation\ValidationServiceProvider;
+use Pollen\WpApp\Validation\ValidatorInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use RuntimeException;
@@ -34,7 +36,8 @@ class WpApp implements WpAppInterface
      */
     protected $serviceProviders = [
         HttpServiceProvider::class,
-        RoutingServiceProvider::class
+        RoutingServiceProvider::class,
+        ValidationServiceProvider::class
     ];
 
     /**
@@ -46,11 +49,7 @@ class WpApp implements WpAppInterface
             throw new RuntimeException('Wordpress must be installed to work');
         }
 
-        $this->setConfig($config);
-
-        add_action('after_setup_theme', function () {
-            $this->boot();
-        });
+        $this->setConfig($config)->boot();
 
         if (!self::$instance instanceof static) {
             self::$instance = $this;
@@ -125,6 +124,17 @@ class WpApp implements WpAppInterface
     {
         if ($this->containerHas(RouterInterface::class)) {
             return $this->containerGet(RouterInterface::class);
+        }
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validator(): ?ValidatorInterface
+    {
+        if ($this->containerHas(ValidatorInterface::class)) {
+            return $this->containerGet(ValidatorInterface::class);
         }
         return null;
     }

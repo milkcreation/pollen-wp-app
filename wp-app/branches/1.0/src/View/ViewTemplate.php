@@ -4,14 +4,24 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\View;
 
+use Pollen\WpApp\Support\Arr;
 use Pollen\WpApp\Support\HtmlAttrs;
-use Illuminate\Support\Arr;
 use League\Plates\Template\Template;
 
 class ViewTemplate extends Template
 {
     /**
-     * Récupération de paramètres
+     * Récupération de la liste des paramètres.
+     *
+     * @return array
+     */
+    public function all(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * Récupération de paramètres.
      *
      * @param string $key Clé d'indexe de l'attribut. Syntaxe à point permise.
      * @param mixed|null $default Valeur de retour par défaut.

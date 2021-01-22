@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Support;
 
-use Illuminate\Support\Arr;
 use ArrayIterator;
 use ArrayAccess;
 use Countable;
