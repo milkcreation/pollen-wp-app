@@ -480,6 +480,13 @@ interface QueryPostInterface
     public function hasTerm($term, string $taxonomy): bool;
 
     /**
+     * Vérifie si le post est habilité à être parent.
+     *
+     * @return bool
+     */
+    public function isHierarchical(): bool;
+
+    /**
      * Vérification de correspondance de type de post.
      *
      * @param array|string $post_types Type(s) de post en correspondance.

@@ -6,172 +6,182 @@ namespace Pollen\WpApp\Validation;
 
 use Exception;
 use finfo;
+use Pollen\WpApp\Validation\Rules\PasswordRule;
+use Pollen\WpApp\Validation\Rules\SerializedRule;
 use Respect\Validation\Exceptions\ValidationException;
 use Respect\Validation\Factory;
 use Respect\Validation\Rules\AllOf as BaseValidator;
 use Respect\Validation\Rules\Key;
 use Respect\Validation\Validatable;
+use Symfony\Component\Validator\Constraint;
 
 /**
- * @method static Validator allOf(Validatable ...$rule)
- * @method static Validator alnum(string ...$additionalChars)
- * @method static Validator alpha(string ...$additionalChars)
- * @method static Validator alwaysInvalid()
- * @method static Validator alwaysValid()
- * @method static Validator anyOf(Validatable ...$rule)
- * @method static Validator arrayType()
- * @method static Validator arrayVal()
- * @method static Validator attribute(string $reference, Validatable $validator = null, bool $mandatory = true)
- * @method static Validator base(int $base, string $chars = null)
- * @method static Validator base64()
- * @method static Validator between($minimum, $maximum)
- * @method static Validator bic(string $countryCode)
- * @method static Validator boolType()
- * @method static Validator boolVal()
- * @method static Validator bsn()
- * @method static Validator call(callable $callable, Validatable $rule)
- * @method static Validator callableType()
- * @method static Validator callback(callable $callback)
- * @method static Validator charset(string ...$charset)
- * @method static Validator cnh()
- * @method static Validator cnpj()
- * @method static Validator control(string ...$additionalChars)
- * @method static Validator consonant(string ...$additionalChars)
- * @method static Validator contains($containsValue, bool $identical = false)
- * @method static Validator containsAny(array $needles, bool $strictCompareArray = false)
- * @method static Validator countable()
- * @method static Validator countryCode(string $set = null)
- * @method static Validator currencyCode()
- * @method static Validator cpf()
- * @method static Validator creditCard(string $brand = null)
- * @method static Validator date(string $format = 'Y-m-d')
- * @method static Validator dateTime(string $format = null)
- * @method static Validator digit(string ...$additionalChars)
- * @method static Validator directory()
- * @method static Validator domain(bool $tldCheck = true)
- * @method static Validator each(Validatable $rule)
- * @method static Validator email()
- * @method static Validator endsWith($endValue, bool $identical = false)
- * @method static Validator equals($compareTo)
- * @method static Validator equivalent($compareTo)
- * @method static Validator even()
- * @method static Validator executable()
- * @method static Validator exists()
- * @method static Validator extension(string $extension)
- * @method static Validator factor(int $dividend)
- * @method static Validator falseVal()
- * @method static Validator fibonacci()
- * @method static Validator file()
- * @method static Validator filterVar(int $filter, $options = null)
- * @method static Validator finite()
- * @method static Validator floatVal()
- * @method static Validator floatType()
- * @method static Validator graph(string ...$additionalChars)
- * @method static Validator greaterThan($compareTo)
- * @method static Validator hexRgbColor()
- * @method static Validator iban()
- * @method static Validator identical($value)
- * @method static Validator image(finfo $fileInfo = null)
- * @method static Validator imei()
- * @method static Validator in($haystack, bool $compareIdentical = false)
- * @method static Validator infinite()
- * @method static Validator instance(string $instanceName)
- * @method static Validator intVal()
- * @method static Validator intType()
- * @method static Validator ip(string $range = '*', int $options = null)
- * @method static Validator isbn()
- * @method static Validator iterableType()
- * @method static Validator json()
- * @method static Validator key(string $reference, Validatable $referenceValidator = null, bool $mandatory = true)
- * @method static Validator keyNested(string $reference, Validatable $referenceValidator = null, bool $mandatory = true)
- * @method static Validator keySet(Key ...$rule)
- * @method static Validator keyValue(string $comparedKey, string $ruleName, string $baseKey)
- * @method static Validator languageCode(string $set = null)
- * @method static Validator leapDate(string $format)
- * @method static Validator leapYear()
- * @method static Validator length(int $min = null, int $max = null, bool $inclusive = true)
- * @method static Validator lowercase()
- * @method static Validator lessThan($compareTo)
- * @method static Validator luhn()
- * @method static Validator macAddress()
- * @method static Validator max($compareTo)
- * @method static Validator maxAge(int $age, string $format = null)
- * @method static Validator mimetype(string $mimetype)
- * @method static Validator min($compareTo)
- * @method static Validator minAge(int $age, string $format = null)
- * @method static Validator multiple(int $multipleOf)
- * @method static Validator negative()
- * @method static Validator nfeAccessKey()
- * @method static Validator nif()
- * @method static Validator nip()
- * @method static Validator no($useLocale = false)
- * @method static Validator noneOf(Validatable ...$rule)
- * @method static Validator not(Validatable $rule)
- * @method static Validator notBlank()
- * @method static Validator notEmoji()
- * @method static Validator notEmpty()
- * @method static Validator notOptional()
- * @method static Validator noWhitespace()
- * @method static Validator nullable(Validatable $rule)
- * @method static Validator nullType()
- * @method static Validator number()
- * @method static Validator numericVal()
- * @method static Validator objectType()
- * @method static Validator odd()
- * @method static Validator oneOf(Validatable ...$rule)
- * @method static Validator optional(Validatable $rule)
- * @method static Validator perfectSquare()
- * @method static Validator pesel()
- * @method static Validator phone()
- * @method static Validator phpLabel()
- * @method static Validator pis()
- * @method static Validator polishIdCard()
- * @method static Validator positive()
- * @method static Validator postalCode(string $countryCode)
- * @method static Validator primeNumber()
- * @method static Validator printable(string ...$additionalChars)
- * @method static Validator punct(string ...$additionalChars)
- * @method static Validator readable()
- * @method static Validator regex(string $regex)
- * @method static Validator resourceType()
- * @method static Validator roman()
- * @method static Validator scalarVal()
- * @method static Validator sf(Constraint $constraint, ValidatorInterface $validator = null)
- * @method static Validator size(string $minSize = null, string $maxSize = null)
- * @method static Validator slug()
- * @method static Validator sorted(string $direction)
- * @method static Validator space(string ...$additionalChars)
- * @method static Validator startsWith($startValue, bool $identical = false)
- * @method static Validator stringType()
- * @method static Validator stringVal()
- * @method static Validator subdivisionCode(string $countryCode)
- * @method static Validator subset(array $superset)
- * @method static Validator symbolicLink()
- * @method static Validator time(string $format = 'H:i:s')
- * @method static Validator tld()
- * @method static Validator trueVal()
- * @method static Validator type(string $type)
- * @method static Validator unique()
- * @method static Validator uploaded()
- * @method static Validator uppercase()
- * @method static Validator url()
- * @method static Validator uuid(int $version = null)
- * @method static Validator version()
- * @method static Validator videoUrl(string $service = null)
- * @method static Validator vowel(string ...$additionalChars)
- * @method static Validator when(Validatable $if, Validatable $then, Validatable $when = null)
- * @method static Validator writable()
- * @method static Validator xdigit(string ...$additionalChars)
- * @method static Validator yes($useLocale = false)
- * @method static Validator zend($validator, array $params = null)
- *
+ * @method static ValidatorInterface allOf(Validatable ...$rule)
+ * @method static ValidatorInterface alnum(string ...$additionalChars)
+ * @method static ValidatorInterface alpha(string ...$additionalChars)
+ * @method static ValidatorInterface alwaysInvalid()
+ * @method static ValidatorInterface alwaysValid()
+ * @method static ValidatorInterface anyOf(Validatable ...$rule)
+ * @method static ValidatorInterface arrayType()
+ * @method static ValidatorInterface arrayVal()
+ * @method static ValidatorInterface attribute(string $reference, Validatable $validator = null, bool $mandatory = true)
+ * @method static ValidatorInterface base(int $base, string $chars = null)
+ * @method static ValidatorInterface base64()
+ * @method static ValidatorInterface between($minimum, $maximum)
+ * @method static ValidatorInterface bic(string $countryCode)
+ * @method static ValidatorInterface boolType()
+ * @method static ValidatorInterface boolVal()
+ * @method static ValidatorInterface bsn()
+ * @method static ValidatorInterface call(callable $callable, Validatable $rule)
+ * @method static ValidatorInterface callableType()
+ * @method static ValidatorInterface callback(callable $callback)
+ * @method static ValidatorInterface charset(string ...$charset)
+ * @method static ValidatorInterface cnh()
+ * @method static ValidatorInterface cnpj()
+ * @method static ValidatorInterface control(string ...$additionalChars)
+ * @method static ValidatorInterface consonant(string ...$additionalChars)
+ * @method static ValidatorInterface contains($containsValue, bool $identical = false)
+ * @method static ValidatorInterface containsAny(array $needles, bool $strictCompareArray = false)
+ * @method static ValidatorInterface countable()
+ * @method static ValidatorInterface countryCode(string $set = null)
+ * @method static ValidatorInterface currencyCode()
+ * @method static ValidatorInterface cpf()
+ * @method static ValidatorInterface creditCard(string $brand = null)
+ * @method static ValidatorInterface date(string $format = 'Y-m-d')
+ * @method static ValidatorInterface dateTime(string $format = null)
+ * @method static ValidatorInterface decimal(string ...$additionalChars)
+ * @method static ValidatorInterface digit(string ...$additionalChars)
+ * @method static ValidatorInterface directory()
+ * @method static ValidatorInterface domain(bool $tldCheck = true)
+ * @method static ValidatorInterface each(Validatable $rule)
+ * @method static ValidatorInterface email()
+ * @method static ValidatorInterface endsWith($endValue, bool $identical = false)
+ * @method static ValidatorInterface equals($compareTo)
+ * @method static ValidatorInterface equivalent($compareTo)
+ * @method static ValidatorInterface even()
+ * @method static ValidatorInterface executable()
+ * @method static ValidatorInterface exists()
+ * @method static ValidatorInterface extension(string $extension)
+ * @method static ValidatorInterface factor(int $dividend)
+ * @method static ValidatorInterface falseVal()
+ * @method static ValidatorInterface fibonacci()
+ * @method static ValidatorInterface file()
+ * @method static ValidatorInterface filterVar(int $filter, $options = null)
+ * @method static ValidatorInterface finite()
+ * @method static ValidatorInterface floatVal()
+ * @method static ValidatorInterface floatType()
+ * @method static ValidatorInterface graph(string ...$additionalChars)
+ * @method static ValidatorInterface greaterThan($compareTo)
+ * @method static ValidatorInterface hexRgbColor()
+ * @method static ValidatorInterface iban()
+ * @method static ValidatorInterface identical($value)
+ * @method static ValidatorInterface image(finfo $fileInfo = null)
+ * @method static ValidatorInterface imei()
+ * @method static ValidatorInterface in($haystack, bool $compareIdentical = false)
+ * @method static ValidatorInterface infinite()
+ * @method static ValidatorInterface instance(string $instanceName)
+ * @method static ValidatorInterface intVal()
+ * @method static ValidatorInterface intType()
+ * @method static ValidatorInterface ip(string $range = '*', int $options = null)
+ * @method static ValidatorInterface isbn()
+ * @method static ValidatorInterface iterableType()
+ * @method static ValidatorInterface json()
+ * @method static ValidatorInterface key(string $reference, Validatable $referenceValidator = null, bool $mandatory = true)
+ * @method static ValidatorInterface keyNested(string $reference, Validatable $referenceValidator = null, bool $mandatory = true)
+ * @method static ValidatorInterface keySet(Key ...$rule)
+ * @method static ValidatorInterface keyValue(string $comparedKey, string $ruleName, string $baseKey)
+ * @method static ValidatorInterface languageCode(string $set = null)
+ * @method static ValidatorInterface leapDate(string $format)
+ * @method static ValidatorInterface leapYear()
+ * @method static ValidatorInterface length(int $min = null, int $max = null, bool $inclusive = true)
+ * @method static ValidatorInterface lowercase()
+ * @method static ValidatorInterface lessThan($compareTo)
+ * @method static ValidatorInterface luhn()
+ * @method static ValidatorInterface macAddress()
+ * @method static ValidatorInterface max($compareTo)
+ * @method static ValidatorInterface maxAge(int $age, string $format = null)
+ * @method static ValidatorInterface mimetype(string $mimetype)
+ * @method static ValidatorInterface min($compareTo)
+ * @method static ValidatorInterface minAge(int $age, string $format = null)
+ * @method static ValidatorInterface multiple(int $multipleOf)
+ * @method static ValidatorInterface negative()
+ * @method static ValidatorInterface nfeAccessKey()
+ * @method static ValidatorInterface nif()
+ * @method static ValidatorInterface nip()
+ * @method static ValidatorInterface no($useLocale = false)
+ * @method static ValidatorInterface noneOf(Validatable ...$rule)
+ * @method static ValidatorInterface not(Validatable $rule)
+ * @method static ValidatorInterface notBlank()
+ * @method static ValidatorInterface notEmoji()
+ * @method static ValidatorInterface notEmpty()
+ * @method static ValidatorInterface notOptional()
+ * @method static ValidatorInterface noWhitespace()
+ * @method static ValidatorInterface nullable(Validatable $rule)
+ * @method static ValidatorInterface nullType()
+ * @method static ValidatorInterface number()
+ * @method static ValidatorInterface numericVal()
+ * @method static ValidatorInterface objectType()
+ * @method static ValidatorInterface odd()
+ * @method static ValidatorInterface oneOf(Validatable ...$rule)
+ * @method static ValidatorInterface optional(Validatable $rule)
+ * @method static ValidatorInterface perfectSquare()
+ * @method static ValidatorInterface pesel()
+ * @method static ValidatorInterface phone()
+ * @method static ValidatorInterface phpLabel()
+ * @method static ValidatorInterface pis()
+ * @method static ValidatorInterface polishIdCard()
+ * @method static ValidatorInterface positive()
+ * @method static ValidatorInterface postalCode(string $countryCode)
+ * @method static ValidatorInterface primeNumber()
+ * @method static ValidatorInterface printable(string ...$additionalChars)
+ * @method static ValidatorInterface punct(string ...$additionalChars)
+ * @method static ValidatorInterface readable()
+ * @method static ValidatorInterface regex(string $regex)
+ * @method static ValidatorInterface resourceType()
+ * @method static ValidatorInterface roman()
+ * @method static ValidatorInterface scalarVal()
+ * @method static ValidatorInterface sf(Constraint $constraint, ValidatorInterface $validator = null)
+ * @method static ValidatorInterface size(string $minSize = null, string $maxSize = null)
+ * @method static ValidatorInterface slug()
+ * @method static ValidatorInterface sorted(string $direction)
+ * @method static ValidatorInterface space(string ...$additionalChars)
+ * @method static ValidatorInterface startsWith($startValue, bool $identical = false)
+ * @method static ValidatorInterface stringType()
+ * @method static ValidatorInterface stringVal()
+ * @method static ValidatorInterface subdivisionCode(string $countryCode)
+ * @method static ValidatorInterface subset(array $superset)
+ * @method static ValidatorInterface symbolicLink()
+ * @method static ValidatorInterface time(string $format = 'H:i:s')
+ * @method static ValidatorInterface tld()
+ * @method static ValidatorInterface trueVal()
+ * @method static ValidatorInterface type(string $type)
+ * @method static ValidatorInterface unique()
+ * @method static ValidatorInterface uploaded()
+ * @method static ValidatorInterface uppercase()
+ * @method static ValidatorInterface url()
+ * @method static ValidatorInterface uuid(int $version = null)
+ * @method static ValidatorInterface version()
+ * @method static ValidatorInterface videoUrl(string $service = null)
+ * @method static ValidatorInterface vowel(string ...$additionalChars)
+ * @method static ValidatorInterface when(Validatable $if, Validatable $then, Validatable $when = null)
+ * @method static ValidatorInterface writable()
+ * @method static ValidatorInterface xdigit(string ...$additionalChars)
+ * @method static ValidatorInterface yes($useLocale = false)
+ * @method static ValidatorInterface zend($validator, array $params = null)
+ * 
  * Personnalisation
  * ---------------------------------------------------------------------------------------------------------------------
- * @method static Rules\PasswordRule password(array $args = [])
- * @method static Rules\SerializedRule serialized(bool $strict = true)
+ * @method static ValidatorInterface password(array $args = [])
+ * @method static ValidatorInterface serialized(bool $strict = true)
  */
 class Validator extends BaseValidator implements ValidatorInterface
 {
+    /**
+     * Instance de la classe.
+     * @var static|null
+     */
+    private static $instance;
+
     /**
      * Liste des régles personnalisées.
      * @var ValidationRuleInterface[]|array
@@ -179,19 +189,42 @@ class Validator extends BaseValidator implements ValidatorInterface
     protected static $customs = [];
 
     /**
-     * @inheritDoc
+     * @param Validatable ...$rules
      */
-    public static function __callStatic(string $ruleName, array $arguments): ValidatorInterface
-    {
-        return self::create()->__call($ruleName, $arguments);
+    public function __construct(Validatable ...$rules) {
+        parent::__construct(...$rules);
+
+        $customRules = [
+            'password'   => new PasswordRule(),
+            'serialized' => new SerializedRule(),
+        ];
+        foreach ($customRules as $name => $rule) {
+            $this->setCustomRule($name, $rule);
+        }
+
+        if (!self::$instance instanceof static) {
+            self::$instance = $this;
+        }
     }
 
     /**
      * @inheritDoc
      */
-    public static function create(): ValidatorInterface
+    public static function __callStatic(string $ruleName, array $arguments): ValidatorInterface
     {
-        return new self();
+        return self::createOrExisting()->__call($ruleName, $arguments);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function createOrExisting(): ValidatorInterface
+    {
+        if (self::$instance instanceof self) {
+            return self::$instance;
+        } else {
+            return new static();
+        }
     }
 
     /**

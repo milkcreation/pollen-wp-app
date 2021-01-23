@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Http;
 
-use Pollen\WpApp\Container\ServiceProvider;
+use Pollen\WpApp\Container\BaseServiceProvider;
 use Psr\Http\Message\RequestInterface as PsrRequestInterface;
 
-class HttpServiceProvider extends ServiceProvider
+class HttpServiceProvider extends BaseServiceProvider
 {
     /**
      * @inheritDoc
