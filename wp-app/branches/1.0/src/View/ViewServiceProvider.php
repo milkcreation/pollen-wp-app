@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\View;
 
-use Pollen\WpApp\Container\ServiceProvider;
+use Pollen\WpApp\Container\BaseServiceProvider;
 
-class ViewServiceProvider extends ServiceProvider
+class ViewServiceProvider extends BaseServiceProvider
 {
     /**
      * @inheritDoc

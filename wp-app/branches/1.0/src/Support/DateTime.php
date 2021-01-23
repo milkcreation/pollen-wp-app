@@ -88,7 +88,7 @@ class DateTime extends Carbon
     public static function setGlobalTimeZone(?DateTimeZone $tz = null): DateTimeZone
     {
         return static::$globalTimeZone = $tz ?: new DateTimeZone(
-            ENV::get('APP_TIMEZONE') ?: Request::createFromGlobals()->server->get(
+            Env::get('APP_TIMEZONE') ?: Request::createFromGlobals()->server->get(
                 'TZ',
                 ini_get('date.timezone') ?: 'UTC'
             )
@@ -98,13 +98,23 @@ class DateTime extends Carbon
     /**
      * Récupération de la date locale pour un format donné.
      *
-     * @param string|null $format Format d'affichage de la date. MySQL par défaut.
+     * @param string|null $format Format d'affichage de la date.
+     * @param string|null $locale ex. en|en_GB|fr ...
      *
      * @return string
      */
-    public function local(?string $format = null): string
+    public function formatLocale(?string $format = null, ?string $locale = null): string
     {
-        return $this->format($format ?: static::$defaultFormat);
+        if ($locale !== null) {
+            $baseLocale = $this->locale ?? null;
+            $this->locale($locale);
+        }
+        $date = $this->settings(['formatFunction' => 'translatedFormat'])->format($format ?: static::$defaultFormat);
+
+        if (isset($baseLocale)) {
+            $this->locale($baseLocale);
+        }
+        return $date;
     }
 
     /**

@@ -6,7 +6,7 @@ namespace Pollen\WpApp\Container;
 
 use League\Container\ServiceProvider\AbstractServiceProvider;
 
-class ServiceProvider extends AbstractServiceProvider implements ServiceProviderInterface
+class BaseServiceProvider extends AbstractServiceProvider implements ServiceProviderInterface
 {
     /**
      * Liste des noms de qualification des services fournis.
@@ -16,16 +16,12 @@ class ServiceProvider extends AbstractServiceProvider implements ServiceProvider
     protected $provides = [];
 
     /**
-     * Initialisation du fournisseur de service.
-     *
-     * @return void
+     * @inheritDoc
      */
     public function boot(): void {}
 
     /**
-     * Déclaration de services.
-     *
-     * @return void
+     * @inheritDoc
      */
     public function register(): void {}
 }

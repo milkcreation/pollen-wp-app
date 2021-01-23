@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Pollen\WpApp\Validation;
 
 use Respect\Validation\Exceptions\ComponentException;
-use Respect\Validation\Rules\AllOf;
 use Respect\Validation\Validatable;
+
 /**
- * @method static Rules\PasswordRule password(array $args = [])
- * @method static Rules\SerializedRule serialized(bool $strict = true)
- * @mixin AllOf
+ * @method static ValidatorInterface password(array $args = [])
+ * @method static ValidatorInterface serialized(bool $strict = true)
  */
 interface ValidatorInterface
 {
@@ -39,11 +38,11 @@ interface ValidatorInterface
     public function __call(string $ruleName, array $arguments): ValidatorInterface;
 
     /**
-     * Création d'une instance de validation.
+     * Récupération de l'instance courante.
      *
      * @return static
      */
-    public static function create(): ValidatorInterface;
+    public static function createOrExisting(): ValidatorInterface;
 
     /**
      * Définition d'une régle personnalisée.

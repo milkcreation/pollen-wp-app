@@ -371,9 +371,9 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public function getDate(bool $gmt = false): string
+    public function getDate(bool $gmt = false, string $format = null): string
     {
-        return $gmt ? (string)$this->get('post_date_gmt') : (string)$this->get('post_date');
+        return $this->getDateTime($gmt)->formatLocale($format ?? get_option('date_format'));
     }
 
     /**
@@ -381,7 +381,7 @@ class QueryPost extends ParamsBag implements QueryPostInterface
      */
     public function getDateTime(bool $gmt = false): DateTime
     {
-        return Datetime::createFromTimeString($this->getDate($gmt));
+        return Datetime::createFromTimeString($gmt ? $this->get('post_date_gmt') : $this->get('post_date'));
     }
 
     /**
@@ -464,9 +464,9 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public function getModified(bool $gmt = false): string
+    public function getModified(bool $gmt = false, string $format = null): string
     {
-        return $gmt ? (string)$this->get('post_modified_gmt') : (string)$this->get('post_modified');
+        return $this->getModifiedDateTime($gmt)->formatLocale($format ?? get_option('date_format'));
     }
 
     /**
@@ -474,7 +474,7 @@ class QueryPost extends ParamsBag implements QueryPostInterface
      */
     public function getModifiedDateTime(bool $gmt = false): DateTime
     {
-        return Datetime::createFromTimeString($this->getModified($gmt));
+        return Datetime::createFromTimeString($gmt ? $this->get('post_modified_gmt') : $this->get('post_modified'));
     }
 
     /**
@@ -610,6 +610,14 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     public function hasTerm($term, string $taxonomy): bool
     {
         return has_term($term, $taxonomy, $this->getWpPost());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function isHierarchical(): bool
+    {
+        return is_post_type_hierarchical($this->getType());
     }
 
     /**

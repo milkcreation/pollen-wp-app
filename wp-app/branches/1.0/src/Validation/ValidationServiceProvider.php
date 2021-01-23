@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Validation;
 
-use Pollen\WpApp\Container\ServiceProvider;
-use Pollen\WpApp\Validation\Rules\PasswordRule;
-use Pollen\WpApp\Validation\Rules\SerializedRule;
+use Pollen\WpApp\Container\BaseServiceProvider;
 
-class ValidationServiceProvider extends ServiceProvider
+class ValidationServiceProvider extends BaseServiceProvider
 {
     /**
      * Liste des noms de qualification des services fournis.
@@ -22,26 +20,10 @@ class ValidationServiceProvider extends ServiceProvider
     /**
      * @inheritDoc
      */
-    public function boot(): void
-    {
-        /** @var ValidatorInterface $validator */
-        $validator = $this->getContainer()->get(ValidatorInterface::class);
-        $rules = [
-            'password'   => new PasswordRule(),
-            'serialized' => new SerializedRule(),
-        ];
-        foreach ($rules as $name => $rule) {
-            $validator->setCustomRule($name, $rule);
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function register(): void
     {
         $this->getContainer()->share(ValidatorInterface::class, function () {
             return new Validator();
-        });
+        })->addTag('validator');
     }
 }
