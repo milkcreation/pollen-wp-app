@@ -98,7 +98,7 @@ class BaseController
      */
     public function referer(int $status = 302, array $headers = []): RedirectResponseInterface
     {
-        return $this->redirect(Request::createFromGlobals()->headers->get('referer'), $status, $headers);
+        return $this->redirect(Request::getFromGlobals()->headers->get('referer'), $status, $headers);
     }
 
     /**
