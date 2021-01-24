@@ -88,7 +88,7 @@ class DateTime extends Carbon
     public static function setGlobalTimeZone(?DateTimeZone $tz = null): DateTimeZone
     {
         return static::$globalTimeZone = $tz ?: new DateTimeZone(
-            Env::get('APP_TIMEZONE') ?: Request::createFromGlobals()->server->get(
+            Env::get('APP_TIMEZONE') ?: Request::getFromGlobals()->server->get(
                 'TZ',
                 ini_get('date.timezone') ?: 'UTC'
             )

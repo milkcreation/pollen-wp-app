@@ -50,7 +50,7 @@ class Router extends BaseRouter implements RouterInterface
 
         parent::__construct($parser, $generator);
 
-        $this->setBasePrefix(Request::createFromGlobals()->getRewriteBase());
+        $this->setBasePrefix(Request::getFromGlobals()->getRewriteBase());
 
         add_action(
             'parse_request',
