@@ -10,6 +10,8 @@ use Respect\Validation\Validatable;
 /**
  * @method static ValidatorInterface password(array $args = [])
  * @method static ValidatorInterface serialized(bool $strict = true)
+ *
+ * @mixin Validatable
  */
 interface ValidatorInterface
 {

@@ -173,6 +173,8 @@ use Symfony\Component\Validator\Constraint;
  * ---------------------------------------------------------------------------------------------------------------------
  * @method static ValidatorInterface password(array $args = [])
  * @method static ValidatorInterface serialized(bool $strict = true)
+ *
+ * @mixin Validatable
  */
 class Validator extends BaseValidator implements ValidatorInterface
 {

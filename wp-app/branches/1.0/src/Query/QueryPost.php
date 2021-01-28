@@ -346,11 +346,19 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public function getClass(array $classes = [], bool $html = true)
+    public function getClass(array $classes = [], bool $html = false): string
     {
-        $classes = get_post_class($classes, $this->getId());
+        $_classes = join(' ', $this->getClasses($classes));
 
-        return $html ? 'class="' . join(' ', $classes) . '"' : $classes;
+        return $html ? 'class="' . $_classes . '"' : $_classes;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getClasses(array $classes = []): array
+    {
+        return get_post_class($classes, $this->getId());
     }
 
     /**
@@ -526,6 +534,25 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
+    public function getQueryThumbnail(): ?QueryPostInterface
+    {
+        return QueryPost::createFromId($this->getThumbnailId());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getQueryTerms($taxonomy, array $args = []): array
+    {
+        return QueryTerm::fetchFromArgs(array_merge($args, [
+            'taxonomy' => $taxonomy,
+            'object_ids' => $this->getId()
+        ]));
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getSlug(): string
     {
         return (string)$this->get('post_name');
@@ -552,6 +579,14 @@ class QueryPost extends ParamsBag implements QueryPostInterface
         $args['object_ids'] = $this->getId();
 
         return (new WP_Term_Query($args))->terms ?: [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getThumbnailId(): int
+    {
+        return get_post_thumbnail_id($this->getId()) ?: 0;
     }
 
     /**

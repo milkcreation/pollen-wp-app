@@ -232,9 +232,18 @@ interface QueryPostInterface
      * @param string[] $classes Liste de classes complémentaires.
      * @param bool $html Activation du format de sortie de l'attribut de balise class. ex. class="post"
      *
+     * @return string
+     */
+    public function getClass(array $classes = [], bool $html = false): string;
+
+    /**
+     * Récupération de la liste des classes HTML associées.
+     *
+     * @param string[] $classes Liste de classes complémentaires.
+     *
      * @return string|array
      */
-    public function getClass(array $classes = [], bool $html = true);
+    public function getClasses(array $classes = []): array;
 
     /**
      * Récupération du contenu de description.
@@ -373,11 +382,28 @@ interface QueryPostInterface
     public function getParentId(): int;
 
     /**
-     * Récupération du chenmin relatif vers l'affichage du post dans l'interface utilisateur.
+     * Récupération du chemin relatif vers l'affichage du post dans l'interface utilisateur.
      *
      * @return string
      */
     public function getPath(): string;
+
+    /**
+     * Récupération de l'instance de l'image représentative associée.
+     *
+     * @return QueryPostInterface|null
+     */
+    public function getQueryThumbnail(): ?QueryPostInterface;
+
+    /**
+     * Récupération de la liste des termes d'une taxonomie associée.
+     *
+     * @param string|array $taxonomy Liste ou Nom de qualification de la taxonomie.
+     * @param array $args Liste des arguments de récupération.
+     *
+     * @return QueryTermInterface[]|array
+     */
+    public function getQueryTerms($taxonomy, array $args = []): array;
 
     /**
      * Récupération du permalien d'affichage du post dans l'interface utilisateur.
@@ -419,6 +445,13 @@ interface QueryPostInterface
      * @return WP_Term[]|array
      */
     public function getTerms($taxonomy, array $args = []): array;
+
+    /**
+     * Récupération l'identifiant de qualification de l'image représentative.
+     *
+     * @return int
+     */
+    public function getThumbnailId(): int;
 
     /**
      * Récupération de l'image représentative.
