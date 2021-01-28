@@ -25,7 +25,7 @@ class RoutingServiceProvider extends BaseServiceProvider
     public function register(): void
     {
         $this->getContainer()->share(RouterInterface::class, function () {
-            return new Router(null, null, $this->getContainer());
+            return new Router(null, $this->getContainer());
         });
         $this->registerStrategies();
     }

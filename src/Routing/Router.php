@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Routing;
 
+use FastRoute\RouteCollector;
 use Pollen\WpApp\Http\Request;
 use Pollen\WpApp\Routing\Concerns\RouteCollectionTrait;
 use Pollen\WpApp\Routing\Strategy\ApplicationStrategy;
 use Pollen\WpApp\Support\Concerns\ContainerAwareTrait;
 use Exception;
-use FastRoute\DataGenerator;
-use FastRoute\RouteParser;
 use League\Route\RouteGroup as BaseRouteGroup;
 use League\Route\Router as BaseRouter;
 use League\Route\Route as BaseRoute;
@@ -35,20 +34,16 @@ class Router extends BaseRouter implements RouterInterface
     protected $basePrefix = '';
 
     /**
-     * @param RouteParser|null $parser
-     * @param DataGenerator|null $generator
+     * @param RouteCollector|null $routeCollector
      * @param Container|null $container
      */
-    public function __construct(
-        ?RouteParser $parser = null,
-        ?DataGenerator $generator = null,
-        ?Container $container = null
+    public function __construct(?RouteCollector $routeCollector = null, ?Container $container = null
     ) {
         if ($container !== null) {
             $this->setContainer($container);
         }
 
-        parent::__construct($parser, $generator);
+        parent::__construct($routeCollector);
 
         $this->setBasePrefix(Request::getFromGlobals()->getRewriteBase());
 
