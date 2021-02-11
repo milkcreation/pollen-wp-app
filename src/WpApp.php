@@ -147,12 +147,12 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public function partial(string $alias = null)
+    public function partial(?string $alias = null, $idOrParams = null, array $params = [])
     {
         if ($this->has(PartialInterface::class)) {
             $manager = $this->get(PartialInterface::class);
 
-            return $alias ? $manager->get($alias) : $manager;
+            return $alias ? $manager->get($alias, $idOrParams, $params) : $manager;
         }
         return null;
     }

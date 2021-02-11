@@ -11,8 +11,17 @@ if (!function_exists('app')) {
 }
 
 if (!function_exists('partial')) {
-    function partial(string $alias): PartialDriverInterface
+    /**
+     * Instance de portions d'affichage.
+     *
+     * @param string|null $alias Alias de qualification.
+     * @param mixed $idOrParams Identifiant de qualification|Liste des attributs de configuration.
+     * @param array $params Liste des attributs de configuration.
+     *
+     * @return PartialDriverInterface|null
+     */
+    function partial(string $alias, $idOrParams = null, array $params = []): ?PartialDriverInterface
     {
-        return app()->partial($alias);
+        return app()->partial($alias, $idOrParams, $params);
     }
 }
