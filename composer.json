@@ -40,14 +40,14 @@
     "phpunit/phpunit": "^9.0"
   },
   "autoload": {
+    "files": [
+      "src/helpers.php"
+    ],
     "psr-4": {
       "Pollen\\WpApp\\": "src"
     }
   },
   "autoload-dev": {
-    "files": [
-      "src/helpers.php"
-    ],
     "psr-4": {
       "Pollen\\WpApp\\Test\\": "tests"
     }
