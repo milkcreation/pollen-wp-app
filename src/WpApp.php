@@ -10,11 +10,19 @@ use Pollen\WpApp\Container\Container;
 use Pollen\WpApp\Container\ServiceProviderInterface;
 use Pollen\WpApp\Http\HttpServiceProvider;
 use Pollen\WpApp\Http\RequestInterface;
+use Pollen\WpApp\Post\PostQuery;
+use Pollen\WpApp\Post\PostQueryInterface;
 use Pollen\WpApp\Support\Concerns\BootableTrait;
 use Pollen\WpApp\Support\Concerns\ConfigBagTrait;
 use Pollen\WpApp\Support\DateTime;
 use Pollen\WpApp\Routing\RoutingServiceProvider;
 use Pollen\WpApp\Routing\RouterInterface;
+use Pollen\WpApp\Term\TermQuery;
+use Pollen\WpApp\Term\TermQueryInterface;
+use Pollen\WpApp\User\UserQuery;
+use Pollen\WpApp\User\UserQueryInterface;
+use Pollen\WpApp\User\UserRoleManagerInterface;
+use Pollen\WpApp\User\UserServiceProvider;
 use Pollen\WpApp\Validation\ValidationServiceProvider;
 use Pollen\WpApp\Validation\ValidatorInterface;
 use Psr\Container\ContainerInterface;
@@ -39,7 +47,8 @@ class WpApp extends Container implements WpAppInterface
     protected $serviceProviders = [
         HttpServiceProvider::class,
         RoutingServiceProvider::class,
-        ValidationServiceProvider::class
+        UserServiceProvider::class,
+        ValidationServiceProvider::class,
     ];
 
     /**
@@ -85,7 +94,7 @@ class WpApp extends Container implements WpAppInterface
 
             $this->serviceProviders += $this->config('service-providers', []);
 
-            foreach($this->serviceProviders as $definition) {
+            foreach ($this->serviceProviders as $definition) {
                 if (is_string($definition)) {
                     try {
                         $serviceProvider = new $definition();
@@ -96,7 +105,7 @@ class WpApp extends Container implements WpAppInterface
                             $e->getMessage()
                         );
                     }
-                } elseif (is_object($definition)){
+                } elseif (is_object($definition)) {
                     $serviceProvider = $definition;
                 } else {
                     throw new RuntimeException(
@@ -111,15 +120,18 @@ class WpApp extends Container implements WpAppInterface
                         $definition,
                         ServiceProviderInterface::class
                     );
-                } else {
-                    $serviceProviders[] = $serviceProvider->setContainer($this);
-                    $this->addServiceProvider($serviceProvider);
                 }
+
+                $serviceProviders[] = $serviceProvider->setContainer($this);
+                $this->addServiceProvider($serviceProvider);
             }
 
-            array_walk($serviceProviders, function (ServiceProviderInterface $serviceProvider){
-                $serviceProvider->boot();
-            });
+            array_walk(
+                $serviceProviders,
+                function (ServiceProviderInterface $serviceProvider) {
+                    $serviceProvider->boot();
+                }
+            );
 
             global $locale;
             DateTime::setLocale($locale);
@@ -143,10 +155,37 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
+    public function post($post = null): ?PostQueryInterface
+    {
+        return PostQuery::create($post);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function posts($query = null): array
+    {
+        return PostQuery::fetch($query);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function request(): ?RequestInterface
     {
         if ($this->has(RequestInterface::class)) {
             return $this->get(RequestInterface::class);
+        }
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function role(): ?UserRoleManagerInterface
+    {
+        if ($this->has(UserRoleManagerInterface::class)) {
+            return $this->get(UserRoleManagerInterface::class);
         }
         return null;
     }
@@ -160,6 +199,38 @@ class WpApp extends Container implements WpAppInterface
             return $this->get(RouterInterface::class);
         }
         return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function term($term = null): ?TermQueryInterface
+    {
+        return TermQuery::create($term);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function terms($query): array
+    {
+        return TermQuery::fetch($query);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function user($id = null): ?UserQueryInterface
+    {
+        return UserQuery::create($id);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function users($query): array
+    {
+        return UserQuery::fetch($query);
     }
 
     /**

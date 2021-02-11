@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Pollen\WpApp\Query;
+namespace Pollen\WpApp\Post;
 
+use Pollen\WpApp\Term\TermQueryInterface;
 use Pollen\WpApp\Support\DateTime;
+use Pollen\WpApp\User\UserQueryInterface;
 use WP_Post;
 use WP_Query;
 use WP_Term;
@@ -37,7 +39,7 @@ use WP_Term;
  *
  * @mixin \Pollen\WpApp\Support\ParamsBag
  */
-interface QueryPostInterface
+interface PostQueryInterface
 {
     /**
      * Création d'une instance basée sur un objet post Wordpress et selon la cartographie des classes de rappel.
@@ -46,7 +48,7 @@ interface QueryPostInterface
      *
      * @return static
      */
-    public static function build(object $wp_post): ?QueryPostInterface;
+    public static function build(object $wp_post): ?PostQueryInterface;
 
     /**
      * Création d'une instance basée sur un argument de qualification.
@@ -56,14 +58,14 @@ interface QueryPostInterface
      *
      * @return static|null
      */
-    public static function create($id = null, ...$args): ?QueryPostInterface;
+    public static function create($id = null, ...$args): ?PostQueryInterface;
 
     /**
      * Récupération d'une instance basée sur le post global courant.
      *
      * @return static|null
      */
-    public static function createFromGlobal(): ?QueryPostInterface;
+    public static function createFromGlobal(): ?PostQueryInterface;
 
     /**
      * Récupération d'une instance basée sur l'identifiant de qualification d'un post.
@@ -72,7 +74,7 @@ interface QueryPostInterface
      *
      * @return static|null
      */
-    public static function createFromId(int $post_id): ?QueryPostInterface;
+    public static function createFromId(int $post_id): ?PostQueryInterface;
 
     /**
      * Récupération d'une instance basée sur le nom de qualification d'un post.
@@ -81,7 +83,7 @@ interface QueryPostInterface
      *
      * @return static|null
      */
-    public static function createFromName(string $post_name): ?QueryPostInterface;
+    public static function createFromName(string $post_name): ?PostQueryInterface;
 
     /**
      * Récupération d'une instance basée sur une liste de données de post.
@@ -90,14 +92,14 @@ interface QueryPostInterface
      *
      * @return static|null
      */
-    public static function createFromPostdata(array $postdata): ?QueryPostInterface;
+    public static function createFromPostdata(array $postdata): ?PostQueryInterface;
 
     /**
      * Récupération d'une liste d'instances des posts courants|selon une requête WP_Query|selon une liste d'arguments.
      *
      * @param WP_Query|array|null $query
      *
-     * @return QueryPost[]|array
+     * @return PostQuery[]|array
      */
     public static function fetch($query = null): array;
 
@@ -142,7 +144,7 @@ interface QueryPostInterface
     /**
      * Vérification d'intégrité d'une instance.
      *
-     * @param QueryPostInterface|object $instance
+     * @param PostQueryInterface|object $instance
      *
      * @return bool
      */
@@ -372,7 +374,7 @@ interface QueryPostInterface
      *
      * @return static|null
      */
-    public function getParent(): ?QueryPostInterface;
+    public function getParent(): ?PostQueryInterface;
 
     /**
      * Récupération de l'identifiant de qualification du post parent relatif.
@@ -389,11 +391,18 @@ interface QueryPostInterface
     public function getPath(): string;
 
     /**
+     * Récupération de l'instance de l'auteur associé.
+     *
+     * @return UserQueryInterface|null
+     */
+    public function getQueriedAuthor(): ?UserQueryInterface;
+
+    /**
      * Récupération de l'instance de l'image représentative associée.
      *
-     * @return QueryPostInterface|null
+     * @return PostQueryInterface|null
      */
-    public function getQueryThumbnail(): ?QueryPostInterface;
+    public function getQueriedThumbnail(): ?PostQueryInterface;
 
     /**
      * Récupération de la liste des termes d'une taxonomie associée.
@@ -401,9 +410,9 @@ interface QueryPostInterface
      * @param string|array $taxonomy Liste ou Nom de qualification de la taxonomie.
      * @param array $args Liste des arguments de récupération.
      *
-     * @return QueryTermInterface[]|array
+     * @return TermQueryInterface[]|array
      */
-    public function getQueryTerms($taxonomy, array $args = []): array;
+    public function getQueriedTerms($taxonomy, array $args = []): array;
 
     /**
      * Récupération du permalien d'affichage du post dans l'interface utilisateur.

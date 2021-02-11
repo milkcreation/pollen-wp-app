@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\WpApp\Query;
+namespace Pollen\WpApp\Term;
 
 use WP_Term;
 use WP_Term_Query;
@@ -21,7 +21,7 @@ use WP_Term_Query;
  *
  * @mixin \Pollen\WpApp\Support\ParamsBag
  */
-interface QueryTermInterface
+interface TermQueryInterface
 {
     /**
      * Création d'une instance basée sur un objet post Wordpress et selon la cartographie des classes de rappel.
@@ -30,7 +30,7 @@ interface QueryTermInterface
      *
      * @return static
      */
-    public static function build(object $wp_term): ?QueryTermInterface;
+    public static function build(object $wp_term): ?TermQueryInterface;
 
     /**
      * Création d'un instance basée sur un argument de qualification.
@@ -40,14 +40,14 @@ interface QueryTermInterface
      *
      * @return static|null
      */
-    public static function create($id = null, ...$args): ?QueryTermInterface;
+    public static function create($id = null, ...$args): ?TermQueryInterface;
 
     /**
      * Récupération d'une instance basée sur le terme global courant.
      *
      * @return static|null
      */
-    public static function createFromGlobal(): ?QueryTermInterface;
+    public static function createFromGlobal(): ?TermQueryInterface;
 
     /**
      * Récupération d'une instance basée sur l'identifiant de qualification du terme.
@@ -56,7 +56,7 @@ interface QueryTermInterface
      *
      * @return static|null
      */
-    public static function createFromId(int $term_id): ?QueryTermInterface;
+    public static function createFromId(int $term_id): ?TermQueryInterface;
 
     /**
      * Récupération d'une instance basée sur le nom de qualification du terme.
@@ -66,14 +66,14 @@ interface QueryTermInterface
      *
      * @return static|null
      */
-    public static function createFromSlug(string $term_slug, ?string $taxonomy = null): ?QueryTermInterface;
+    public static function createFromSlug(string $term_slug, ?string $taxonomy = null): ?TermQueryInterface;
 
     /**
      * Récupération d'une liste des instances des termes courants|selon une requête WP_Term_Query|selon une liste d'arguments.
      *
      * @param WP_Term_Query|array $query
      *
-     * @return QueryTermInterface[]|array
+     * @return TermQueryInterface[]|array
      */
     public static function fetch($query): array;
 
@@ -83,7 +83,7 @@ interface QueryTermInterface
      *
      * @param array $args Liste des arguments de la requête récupération des éléments.
      *
-     * @return QueryTermInterface[]|array
+     * @return TermQueryInterface[]|array
      */
     public static function fetchFromArgs(array $args = []): array;
 
@@ -93,7 +93,7 @@ interface QueryTermInterface
      *
      * @param int[] $ids Liste des identifiants de qualification.
      *
-     * @return QueryTermInterface[]|array
+     * @return TermQueryInterface[]|array
      */
     public static function fetchFromIds(array $ids): array;
 
@@ -103,7 +103,7 @@ interface QueryTermInterface
      *
      * @param WP_Term_Query $wp_term_query
      *
-     * @return QueryTermInterface[]|array
+     * @return TermQueryInterface[]|array
      */
     public static function fetchFromWpTermQuery(WP_Term_Query $wp_term_query): array;
 

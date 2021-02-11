@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Pollen\WpApp\Query;
+namespace Pollen\WpApp\Post;
 
 use Pollen\WpApp\Support\Arr;
 use Pollen\WpApp\Support\DateTime;
 use Pollen\WpApp\Support\ParamsBag;
 use Pollen\WpApp\Support\Str;
+use Pollen\WpApp\Term\TermQuery;
+use Pollen\WpApp\User\UserQuery;
+use Pollen\WpApp\User\UserQueryInterface;
 use WP_Post;
 use WP_Query;
 use WP_Term_Query;
@@ -38,7 +41,7 @@ use WP_Term_Query;
  * @property-read int $comment_count
  * @property-read string $filter
  */
-class QueryPost extends ParamsBag implements QueryPostInterface
+class PostQuery extends ParamsBag implements PostQueryInterface
 {
     /**
      * Liste des classes de rappel d'instanciation selon le type de post.
@@ -66,7 +69,7 @@ class QueryPost extends ParamsBag implements QueryPostInterface
 
     /**
      * Instance du parent.
-     * @var QueryPost|false|null
+     * @var PostQuery|false|null
      */
     protected $parent;
 
@@ -93,7 +96,7 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public static function build(object $wp_post): ?QueryPostInterface
+    public static function build(object $wp_post): ?PostQueryInterface
     {
         if (!$wp_post instanceof WP_Post) {
             return null;
@@ -110,27 +113,30 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public static function create($id = null, ...$args): ?QueryPostInterface
+    public static function create($id = null, ...$args): ?PostQueryInterface
     {
         if (is_numeric($id)) {
             return static::createFromId((int)$id);
-        } elseif (is_string($id)) {
-            return static::createFromName($id);
-        } elseif ($id instanceof WP_Post) {
-            return static::build($id);
-        } elseif ($id instanceof QueryPostInterface) {
-            return static::createFromId($id->getId());
-        } elseif (is_null($id)) {
-            return static::createFromGlobal();
-        } else {
-            return null;
         }
+        if (is_string($id)) {
+            return static::createFromName($id);
+        }
+        if ($id instanceof WP_Post) {
+            return static::build($id);
+        }
+        if ($id instanceof PostQueryInterface) {
+            return static::createFromId($id->getId());
+        }
+        if (is_null($id)) {
+            return static::createFromGlobal();
+        }
+        return null;
     }
 
     /**
      * @inheritDoc
      */
-    public static function createFromGlobal(): ?QueryPostInterface
+    public static function createFromGlobal(): ?PostQueryInterface
     {
         global $post;
 
@@ -140,23 +146,21 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public static function createFromId(int $post_id): ?QueryPostInterface
+    public static function createFromId(int $post_id): ?PostQueryInterface
     {
         if ($post_id && ($wp_post = get_post($post_id)) && ($wp_post instanceof WP_Post)) {
             if (!$instance = static::build($wp_post)) {
                 return null;
-            } else {
-                return $instance::is($instance) ? $instance : null;
             }
-        } else {
-            return null;
+            return $instance::is($instance) ? $instance : null;
         }
+        return null;
     }
 
     /**
      * @inheritDoc
      */
-    public static function createFromName(string $post_name): ?QueryPostInterface
+    public static function createFromName(string $post_name): ?PostQueryInterface
     {
         $wpQuery = new WP_Query(static::parseQueryArgs(['name' => $post_name]));
 
@@ -166,7 +170,7 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public static function createFromPostdata(array $postdata): ?QueryPostInterface
+    public static function createFromPostdata(array $postdata): ?PostQueryInterface
     {
         return ($instance = static::createFromId((new WP_Post((object)$postdata))->ID ?? 0)) ? $instance : null;
     }
@@ -178,13 +182,14 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     {
         if (is_array($query)) {
             return static::fetchFromArgs($query);
-        } elseif ($query instanceof WP_Query) {
-            return static::fetchFromWpQuery($query);
-        } elseif (is_null($query)) {
-            return static::fetchFromGlobal();
-        } else {
-            return [];
         }
+        if ($query instanceof WP_Query) {
+            return static::fetchFromWpQuery($query);
+        }
+        if (is_null($query)) {
+            return static::fetchFromGlobal();
+        }
+        return [];
     }
 
     /**
@@ -214,9 +219,8 @@ class QueryPost extends ParamsBag implements QueryPostInterface
             $args = static::parseQueryArgs(['post__in' => $ids, 'posts_per_page' => count($ids)]);
 
             return static::fetchFromWpQuery(new WP_Query($args));
-        } else {
-            return [];
         }
+        return [];
     }
 
     /**
@@ -335,12 +339,17 @@ class QueryPost extends ParamsBag implements QueryPostInterface
             $per_page = get_option('posts_per_page');
         }
 
-        return static::fetchFromArgs(array_merge($args, [
-            'paged'          => $page,
-            'post_parent'    => $this->getId(),
-            'post_status'    => 'publish',
-            'posts_per_page' => $per_page,
-        ]));
+        return static::fetchFromArgs(
+            array_merge(
+                $args,
+                [
+                    'paged'          => $page,
+                    'post_parent'    => $this->getId(),
+                    'post_status'    => 'publish',
+                    'posts_per_page' => $per_page,
+                ]
+            )
+        );
     }
 
     /**
@@ -348,7 +357,7 @@ class QueryPost extends ParamsBag implements QueryPostInterface
      */
     public function getClass(array $classes = [], bool $html = false): string
     {
-        $_classes = join(' ', $this->getClasses($classes));
+        $_classes = implode(' ', $this->getClasses($classes));
 
         return $html ? 'class="' . $_classes . '"' : $_classes;
     }
@@ -496,7 +505,7 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public function getParent(): ?QueryPostInterface
+    public function getParent(): ?PostQueryInterface
     {
         if (is_null($this->parent) && ($parent_id = $this->getParentId())) {
             $this->parent = static::createFromId($parent_id) ?: false;
@@ -534,20 +543,33 @@ class QueryPost extends ParamsBag implements QueryPostInterface
     /**
      * @inheritDoc
      */
-    public function getQueryThumbnail(): ?QueryPostInterface
+    public function getQueriedAuthor(): ?UserQueryInterface
     {
-        return QueryPost::createFromId($this->getThumbnailId());
+        return UserQuery::createFromId($this->getAuthorId());
     }
 
     /**
      * @inheritDoc
      */
-    public function getQueryTerms($taxonomy, array $args = []): array
+    public function getQueriedThumbnail(): ?PostQueryInterface
     {
-        return QueryTerm::fetchFromArgs(array_merge($args, [
-            'taxonomy' => $taxonomy,
-            'object_ids' => $this->getId()
-        ]));
+        return self::createFromId($this->getThumbnailId());
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getQueriedTerms($taxonomy, array $args = []): array
+    {
+        return TermQuery::fetchFromArgs(
+            array_merge(
+                $args,
+                [
+                    'taxonomy'   => $taxonomy,
+                    'object_ids' => $this->getId(),
+                ]
+            )
+        );
     }
 
     /**
@@ -636,7 +658,7 @@ class QueryPost extends ParamsBag implements QueryPostInterface
      */
     public function hasMore(): bool
     {
-        return !!preg_match('/<!--more(.*?)?-->/', $this->getContent(true));
+        return (bool)preg_match('/<!--more(.*?)?-->/', $this->getContent(true));
     }
 
     /**
@@ -660,6 +682,6 @@ class QueryPost extends ParamsBag implements QueryPostInterface
      */
     public function typeIn($post_types): bool
     {
-        return in_array($this->getType(), Arr::wrap($post_types));
+        return in_array($this->getType(), Arr::wrap($post_types), true);
     }
 }
