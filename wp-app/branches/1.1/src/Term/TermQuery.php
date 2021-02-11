@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\WpApp\Query;
+namespace Pollen\WpApp\Term;
 
 use Pollen\WpApp\Support\Arr;
 use Pollen\WpApp\Support\ParamsBag;
@@ -21,7 +21,7 @@ use WP_Term_Query;
  * @property-read int $count
  * @property-read string $filter
  */
-class QueryTerm extends ParamsBag implements QueryTermInterface
+class TermQuery extends ParamsBag implements TermQueryInterface
 {
     /**
      * Liste des classes de rappel d'instanciation selon la taxonomie.
@@ -76,7 +76,7 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
     /**
      * @inheritDoc
      */
-    public static function build(object $wp_term): ?QueryTermInterface
+    public static function build(object $wp_term): ?TermQueryInterface
     {
         if (!$wp_term instanceof WP_Term) {
             return null;
@@ -93,31 +93,33 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
     /**
      * @inheritDoc
      */
-    public static function create($id = null, ...$args): ?QueryTermInterface
+    public static function create($id = null, ...$args): ?TermQueryInterface
     {
         if (is_numeric($id)) {
             return static::createFromId((int)$id);
-        } elseif (is_string($id)) {
+        }
+        if (is_string($id)) {
             return static::createFromSlug($id, ...$args);
-        } elseif ($id instanceof WP_Term) {
+        }
+        if ($id instanceof WP_Term) {
             return static::build($id);
-        } elseif ($id instanceof QueryTermInterface) {
+        }
+        if ($id instanceof TermQueryInterface) {
             return static::createFromId($id->getId());
-        } elseif (is_null($id) && ($instance = static::createFromGlobal())) {
+        }
+        if (is_null($id) && ($instance = static::createFromGlobal())) {
             if (($taxonomy = static::$taxonomy)) {
                 return $instance->getTaxonomy() === $taxonomy ? $instance : null;
-            } else {
-                return $instance;
             }
-        } else {
-            return null;
+            return $instance;
         }
+        return null;
     }
 
     /**
      * @inheritDoc
      */
-    public static function createFromGlobal(): ?QueryTermInterface
+    public static function createFromGlobal(): ?TermQueryInterface
     {
         global $wp_query;
 
@@ -128,23 +130,21 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
     /**
      * @inheritDoc
      */
-    public static function createFromId(int $term_id): ?QueryTermInterface
+    public static function createFromId(int $term_id): ?TermQueryInterface
     {
         if ($term_id && ($wp_term = get_term($term_id)) && ($wp_term instanceof WP_Term)) {
             if (!$instance = static::build($wp_term)) {
                 return null;
-            } else {
-                return $instance::is($instance) ? $instance : null;
             }
-        } else {
-            return null;
+            return $instance::is($instance) ? $instance : null;
         }
+        return null;
     }
 
     /**
      * @inheritDoc
      */
-    public static function createFromSlug(string $term_slug, ?string $taxonomy = null): ?QueryTermInterface
+    public static function createFromSlug(string $term_slug, ?string $taxonomy = null): ?TermQueryInterface
     {
         $wp_term = get_term_by('slug', $term_slug, $taxonomy ?? static::$taxonomy);
 
@@ -158,11 +158,11 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
     {
         if (is_array($query)) {
             return static::fetchFromArgs($query);
-        } elseif ($query instanceof WP_Term_Query) {
-            return static::fetchFromWpTermQuery($query);
-        } else {
-            return [];
         }
+        if ($query instanceof WP_Term_Query) {
+            return static::fetchFromWpTermQuery($query);
+        }
+        return [];
     }
 
     /**
@@ -187,37 +187,17 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
     public static function fetchFromWpTermQuery(WP_Term_Query $wp_term_query): array
     {
         $terms = $wp_term_query->get_terms();
-        $per_page = $wp_term_query->query_vars['number'] ?: -1;
-        $count = count($terms);
-        $offset = $wp_term_query->query_vars['offset'] ?: 0;
-
-        if ($per_page > 0) {
-            $wp_term_query_count = new WP_Term_Query(array_merge($wp_term_query->query_vars, [
-                'count'  => false,
-                'number' => 0,
-                'offset' => 0,
-                'fields' => 'count',
-            ]));
-
-            $total = (int)$wp_term_query_count->get_terms();
-            $pages = (int)ceil($total / $per_page);
-            $page = (int)ceil(($offset + 1) / $per_page);
-        } else {
-            $pages = 1;
-            $page = 1;
-            $total = (int)count($terms);
-        }
 
         $results = [];
         foreach ($terms as $wp_term) {
-            $instance = static::createFromId($wp_term->term_id);
-
-            if (($taxonomy = static::$taxonomy) && ($taxonomy !== 'any')) {
-                if ($instance->taxIn($taxonomy)) {
+            if ($instance = static::createFromId($wp_term->term_id)) {
+                if (($taxonomy = static::$taxonomy) && ($taxonomy !== 'any')) {
+                    if ($instance->taxIn($taxonomy)) {
+                        $results[] = $instance;
+                    }
+                } else {
                     $results[] = $instance;
                 }
-            } else {
-                $results[] = $instance;
             }
         }
 
@@ -290,7 +270,7 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
      */
     public function getDescription(): string
     {
-        return (string)$this->get('description', '');
+        return (string)$this->get('description');
     }
 
     /**
@@ -298,7 +278,7 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
      */
     public function getId(): int
     {
-        return intval($this->get('term_id', 0));
+        return (int)$this->get('term_id', 0);
     }
 
     /**
@@ -330,7 +310,7 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
      */
     public function getName(): string
     {
-        return (string)$this->get('name', '');
+        return (string)$this->get('name');
     }
 
     /**
@@ -346,7 +326,7 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
      */
     public function getSlug(): string
     {
-        return (string)$this->get('slug', '');
+        return (string)$this->get('slug');
     }
 
     /**
@@ -354,7 +334,7 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
      */
     public function getTaxonomy(): string
     {
-        return (string)$this->get('taxonomy', '');
+        return (string)$this->get('taxonomy');
     }
 
     /**
@@ -370,6 +350,6 @@ class QueryTerm extends ParamsBag implements QueryTermInterface
      */
     public function taxIn($taxonomies): bool
     {
-        return in_array((string)$this->getTaxonomy(), Arr::wrap($taxonomies));
+        return in_array($this->getTaxonomy(), Arr::wrap($taxonomies), true);
     }
 }
