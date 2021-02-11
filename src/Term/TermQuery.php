@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Term;
 
-use Pollen\WpApp\Support\Arr;
-use Pollen\WpApp\Support\ParamsBag;
+use Pollen\Support\Arr;
+use Pollen\Support\ParamsBag;
 use WP_Term;
 use WP_Term_Query;
 

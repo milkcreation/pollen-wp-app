@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\User;
 
-use Pollen\WpApp\Support\Arr;
-use Pollen\WpApp\Support\ParamsBag;
+use Pollen\Support\Arr;
+use Pollen\Support\ParamsBag;
 use WP_Site;
 use WP_User;
 use WP_User_Query;
@@ -462,7 +462,7 @@ class UserQuery extends ParamsBag implements UserQueryInterface
      */
     public function getUrl(): string
     {
-        return $this->get('user_url', '');
+        return $this->get('user_url');
     }
 
     /**

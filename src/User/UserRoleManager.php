@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\User;
 
-use Pollen\WpApp\Support\Concerns\ContainerAwareTrait;
+use Pollen\Support\Concerns\ContainerAwareTrait;
 use Psr\Container\ContainerInterface as Container;
 
 class UserRoleManager implements UserRoleManagerInterface

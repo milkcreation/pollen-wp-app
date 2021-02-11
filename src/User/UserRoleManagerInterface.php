@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Pollen\WpApp\User;
 
 /**
- * @mixin \Pollen\WpApp\Support\Concerns\ContainerAwareTrait
+ * @mixin \Pollen\Support\Concerns\ContainerAwareTrait
  */
 interface UserRoleManagerInterface
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\User;
 
-use Pollen\WpApp\Container\BaseServiceProvider;
+use Pollen\Container\BaseServiceProvider;
 
 class UserServiceProvider extends BaseServiceProvider
 {

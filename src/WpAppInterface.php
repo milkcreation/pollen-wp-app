@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
-use Pollen\WpApp\Http\RequestInterface;
-use Pollen\WpApp\Routing\RouterInterface;
+use Pollen\Http\RequestInterface;
+use Pollen\Routing\RouterInterface;
+use Pollen\Validation\ValidatorInterface;
 use Pollen\WpApp\Post\PostQueryInterface;
 use Pollen\WpApp\Term\TermQueryInterface;
 use Pollen\WpApp\User\UserQueryInterface;
 use Pollen\WpApp\User\UserRoleManagerInterface;
-use Pollen\WpApp\Validation\ValidatorInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use WP_Post;
 use WP_Query;
@@ -20,9 +20,9 @@ use WP_User;
 use WP_User_Query;
 
 /**
- * @mixin \Pollen\WpApp\Container\Container
- * @mixin \Pollen\WpApp\Support\Concerns\BootableTrait
- * @mixin \Pollen\WpApp\Support\Concerns\ConfigBagTrait
+ * @mixin \Pollen\Container\Container
+ * @mixin \Pollen\Support\Concerns\BootableTrait
+ * @mixin \Pollen\Support\Concerns\ConfigBagTrait
  */
 interface WpAppInterface
 {

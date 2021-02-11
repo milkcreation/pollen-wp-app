@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Post;
 
+use Pollen\Support\DateTime;
 use Pollen\WpApp\Term\TermQueryInterface;
-use Pollen\WpApp\Support\DateTime;
 use Pollen\WpApp\User\UserQueryInterface;
 use WP_Post;
 use WP_Query;
@@ -37,7 +37,7 @@ use WP_Term;
  * @property-read int $comment_count
  * @property-read string $filter
  *
- * @mixin \Pollen\WpApp\Support\ParamsBag
+ * @mixin \Pollen\Support\ParamsBag
  */
 interface PostQueryInterface
 {

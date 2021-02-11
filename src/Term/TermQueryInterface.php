@@ -19,7 +19,7 @@ use WP_Term_Query;
  * @property-read int $count
  * @property-read string $filter
  *
- * @mixin \Pollen\WpApp\Support\ParamsBag
+ * @mixin \Pollen\Support\ParamsBag
  */
 interface TermQueryInterface
 {

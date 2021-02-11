@@ -4,30 +4,30 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
-use Error;
 use League\Container\ReflectionContainer;
-use Pollen\WpApp\Container\Container;
-use Pollen\WpApp\Container\ServiceProviderInterface;
-use Pollen\WpApp\Http\HttpServiceProvider;
-use Pollen\WpApp\Http\RequestInterface;
+use Pollen\Container\Container;
+use Pollen\Container\ServiceProviderInterface;
+use Pollen\Http\HttpServiceProvider;
+use Pollen\Http\RequestInterface;
+use Pollen\Support\Concerns\BootableTrait;
+use Pollen\Support\Concerns\ConfigBagTrait;
+use Pollen\Support\DateTime;
+use Pollen\Routing\RoutingServiceProvider;
+use Pollen\Routing\RouterInterface;
+use Pollen\Validation\ValidationServiceProvider;
+use Pollen\Validation\ValidatorInterface;
 use Pollen\WpApp\Post\PostQuery;
 use Pollen\WpApp\Post\PostQueryInterface;
-use Pollen\WpApp\Support\Concerns\BootableTrait;
-use Pollen\WpApp\Support\Concerns\ConfigBagTrait;
-use Pollen\WpApp\Support\DateTime;
-use Pollen\WpApp\Routing\RoutingServiceProvider;
-use Pollen\WpApp\Routing\RouterInterface;
 use Pollen\WpApp\Term\TermQuery;
 use Pollen\WpApp\Term\TermQueryInterface;
 use Pollen\WpApp\User\UserQuery;
 use Pollen\WpApp\User\UserQueryInterface;
 use Pollen\WpApp\User\UserRoleManagerInterface;
 use Pollen\WpApp\User\UserServiceProvider;
-use Pollen\WpApp\Validation\ValidationServiceProvider;
-use Pollen\WpApp\Validation\ValidatorInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use RuntimeException;
+use Throwable;
 
 class WpApp extends Container implements WpAppInterface
 {
@@ -98,7 +98,7 @@ class WpApp extends Container implements WpAppInterface
                 if (is_string($definition)) {
                     try {
                         $serviceProvider = new $definition();
-                    } catch (Error $e) {
+                    } catch (Throwable $e) {
                         throw new RuntimeException(
                             'ServiceProvider [%s] instanciation return exception :%s',
                             $definition,
