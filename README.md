@@ -2,7 +2,7 @@
 
 [![Latest Version](https://img.shields.io/badge/release-1.0.0-blue?style=for-the-badge)](https://www.presstify.com/pollen-solutions/wp-app/)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE.md)
-[![PHP Supported Versions](https://img.shields.io/badge/PHP->=7.3-8892BF?style=for-the-badge&logo=php)](https://www.php.net/supported-versions.php)
+[![PHP Supported Versions](https://img.shields.io/badge/PHP->=7.4-8892BF?style=for-the-badge&logo=php)](https://www.php.net/supported-versions.php)
 
 Pollen **Wordpress App** Component is a Micro Framework.
 It contains a set of useful tools for developing applications in a Wordpress environment. 
@@ -20,7 +20,5 @@ composer require pollen-solutions/wp-app
 use Pollen\WpApp\WpApp;
 
 // @see vendor/pollen-solutions/wp-app/resources/config/wp-app.php
-$config = [];
-
-new WpApp($config);
+new WpApp([/** Configuration args */]);
 ```
