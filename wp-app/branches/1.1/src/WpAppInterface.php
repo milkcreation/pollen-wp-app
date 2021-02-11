@@ -36,13 +36,15 @@ interface WpAppInterface
     public function boot(): WpAppInterface;
 
     /**
-     * Récupération du gestionnaire de partial ou instance d'un partial déclaré selon son alias.
+     * Récupération du gestionnaire de partial ou instance de partial déclaré selon son alias.
      *
-     * @param string|null $alias
+     * @param string|null $alias Alias de qualification|null pour l'instance du gestionnaire.
+     * @param mixed $idOrParams Identifiant de qualification|Liste des attributs de configuration.
+     * @param array $params Liste des attributs de configuration.
      *
      * @return PartialInterface|PartialDriverInterface|null
      */
-    public function partial(string $alias = null);
+    public function partial(?string $alias = null, $idOrParams = null, array $params = []);
 
     /**
      * Instance du post courant ou associé à une définition.
