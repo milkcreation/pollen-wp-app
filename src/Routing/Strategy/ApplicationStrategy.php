@@ -29,6 +29,6 @@ class ApplicationStrategy extends BaseApplicationStrategy
         } elseif (!$response instanceof PsrResponse) {
             $response = is_string($response) ? (new Response($response))->psr() : (new Response())->psr();
         }
-        return $this->applyDefaultResponseHeaders($response);
+        return $this->decorateResponse($response);
     }
 }

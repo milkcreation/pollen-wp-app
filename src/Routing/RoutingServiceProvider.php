@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Routing;
 
-use Pollen\WpApp\Container\ServiceProvider;
+use Pollen\WpApp\Container\BaseServiceProvider;
 use Pollen\WpApp\Routing\Strategy\ApplicationStrategy;
 use Pollen\WpApp\Routing\Strategy\JsonStrategy;
 use Pollen\WpApp\Routing\Strategy\WpTemplateStrategy;
 use Laminas\Diactoros\ResponseFactory;
 
-class RoutingServiceProvider extends ServiceProvider
+class RoutingServiceProvider extends BaseServiceProvider
 {
     protected $provides = [
         RouterInterface::class,
@@ -25,7 +25,7 @@ class RoutingServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->getContainer()->share(RouterInterface::class, function () {
-            return new Router(null, null, $this->getContainer());
+            return new Router(null, $this->getContainer());
         });
         $this->registerStrategies();
     }

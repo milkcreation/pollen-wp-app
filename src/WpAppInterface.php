@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
-use Pollen\WpApp\Container\Container;
 use Pollen\WpApp\Http\RequestInterface;
 use Pollen\WpApp\Routing\RouterInterface;
-use Psr\Container\ContainerInterface;
+use Pollen\WpApp\Validation\ValidatorInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 
 /**
+ * @mixin \Pollen\WpApp\Container\Container
  * @mixin \Pollen\WpApp\Support\Concerns\BootableTrait
  * @mixin \Pollen\WpApp\Support\Concerns\ConfigBagTrait
- * @mixin \Pollen\WpApp\Support\Concerns\ContainerAwareTrait
  */
 interface WpAppInterface
 {
@@ -30,13 +29,6 @@ interface WpAppInterface
      * @return static
      */
     public function boot(): WpAppInterface;
-
-    /**
-     * Instance du conteneur d'injection de dépendances.
-     *
-     * @return ContainerInterface|Container|null
-     */
-    public function getContainer(): ?ContainerInterface;
 
     /**
      * Instance de la requête HTTP globale au format PSR-7.
@@ -58,4 +50,11 @@ interface WpAppInterface
      * @return RouterInterface|null
      */
     public function router(): ?RouterInterface;
+
+    /**
+     * Instance du gestionnaire de validation.
+     *
+     * @return ValidatorInterface|null
+     */
+    public function validator(): ?ValidatorInterface;
 }

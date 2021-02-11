@@ -122,7 +122,7 @@ class WpTemplateStrategy extends ApplicationStrategy
             0
         );
 
-        return $this->applyDefaultResponseHeaders((new Response())->psr()->withStatus(100));
+        return $this->decorateResponse((new Response())->psr()->withStatus(100));
     }
 
     /**

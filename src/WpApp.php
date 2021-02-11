@@ -4,22 +4,26 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
+use Error;
+use League\Container\ReflectionContainer;
 use Pollen\WpApp\Container\Container;
+use Pollen\WpApp\Container\ServiceProviderInterface;
 use Pollen\WpApp\Http\HttpServiceProvider;
 use Pollen\WpApp\Http\RequestInterface;
 use Pollen\WpApp\Support\Concerns\BootableTrait;
 use Pollen\WpApp\Support\Concerns\ConfigBagTrait;
-use Pollen\WpApp\Support\Concerns\ContainerAwareTrait;
+use Pollen\WpApp\Support\DateTime;
 use Pollen\WpApp\Routing\RoutingServiceProvider;
 use Pollen\WpApp\Routing\RouterInterface;
+use Pollen\WpApp\Validation\ValidationServiceProvider;
+use Pollen\WpApp\Validation\ValidatorInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use RuntimeException;
 
-class WpApp implements WpAppInterface
+class WpApp extends Container implements WpAppInterface
 {
     use BootableTrait;
-    use ContainerAwareTrait;
     use ConfigBagTrait;
 
     /**
@@ -34,7 +38,8 @@ class WpApp implements WpAppInterface
      */
     protected $serviceProviders = [
         HttpServiceProvider::class,
-        RoutingServiceProvider::class
+        RoutingServiceProvider::class,
+        ValidationServiceProvider::class
     ];
 
     /**
@@ -46,11 +51,11 @@ class WpApp implements WpAppInterface
             throw new RuntimeException('Wordpress must be installed to work');
         }
 
-        $this->setConfig($config);
+        parent::__construct();
 
-        add_action('after_setup_theme', function () {
-            $this->boot();
-        });
+        $this->share(ContainerInterface::class, $this);
+
+        $this->setConfig($config)->boot();
 
         if (!self::$instance instanceof static) {
             self::$instance = $this;
@@ -74,12 +79,50 @@ class WpApp implements WpAppInterface
     public function boot(): WpAppInterface
     {
         if (!$this->isBooted()) {
-            $this->setContainer(new Container());
+            $this->delegate((new ReflectionContainer())->cacheResolutions());
 
-            foreach ($this->serviceProviders as $serviceProvider) {
-                $this->getContainer()->setProvider($serviceProvider);
+            $this->share('config', $this->config());
+
+            $this->serviceProviders += $this->config('service-providers', []);
+
+            foreach($this->serviceProviders as $definition) {
+                if (is_string($definition)) {
+                    try {
+                        $serviceProvider = new $definition();
+                    } catch (Error $e) {
+                        throw new RuntimeException(
+                            'ServiceProvider [%s] instanciation return exception :%s',
+                            $definition,
+                            $e->getMessage()
+                        );
+                    }
+                } elseif (is_object($definition)){
+                    $serviceProvider = $definition;
+                } else {
+                    throw new RuntimeException(
+                        'ServiceProvider [%s] type not supported',
+                        $definition
+                    );
+                }
+
+                if (!$serviceProvider instanceof ServiceProviderInterface) {
+                    throw new RuntimeException(
+                        'ServiceProvider [%s] must be an instance of %s',
+                        $definition,
+                        ServiceProviderInterface::class
+                    );
+                } else {
+                    $serviceProviders[] = $serviceProvider->setContainer($this);
+                    $this->addServiceProvider($serviceProvider);
+                }
             }
-            $this->getContainer()->boot();
+
+            array_walk($serviceProviders, function (ServiceProviderInterface $serviceProvider){
+                $serviceProvider->boot();
+            });
+
+            global $locale;
+            DateTime::setLocale($locale);
 
             $this->setBooted();
         }
@@ -87,22 +130,12 @@ class WpApp implements WpAppInterface
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return ContainerInterface|Container|null
-     */
-    public function getContainer(): ?ContainerInterface
-    {
-        return $this->container;
-    }
-
-    /**
      * @inheritDoc
      */
     public function psrRequest(): ?PsrRequest
     {
-        if ($this->containerHas(PsrRequest::class)) {
-            return $this->containerGet(PsrRequest::class);
+        if ($this->has(PsrRequest::class)) {
+            return $this->get(PsrRequest::class);
         }
         return null;
     }
@@ -112,8 +145,8 @@ class WpApp implements WpAppInterface
      */
     public function request(): ?RequestInterface
     {
-        if ($this->containerHas(RequestInterface::class)) {
-            return $this->containerGet(RequestInterface::class);
+        if ($this->has(RequestInterface::class)) {
+            return $this->get(RequestInterface::class);
         }
         return null;
     }
@@ -123,9 +156,34 @@ class WpApp implements WpAppInterface
      */
     public function router(): ?RouterInterface
     {
-        if ($this->containerHas(RouterInterface::class)) {
-            return $this->containerGet(RouterInterface::class);
+        if ($this->has(RouterInterface::class)) {
+            return $this->get(RouterInterface::class);
         }
         return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validator(): ?ValidatorInterface
+    {
+        if ($this->has(ValidatorInterface::class)) {
+            return $this->get(ValidatorInterface::class);
+        }
+        return null;
+    }
+
+    /**
+     * Déclaration d'un fournisseur de service.
+     *
+     * @param string|ServiceProviderInterface $serviceProviderDefinition
+     *
+     * @return static
+     */
+    public function setProvider($serviceProviderDefinition): self
+    {
+        $this->serviceProviders[] = $serviceProviderDefinition;
+
+        return $this;
     }
 }

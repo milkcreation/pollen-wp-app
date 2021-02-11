@@ -27,9 +27,9 @@ class JsonStrategy extends BaseJsonStrategy
         if ($response instanceof ResponseInterface) {
             $response = $response->psr();
         } elseif (!$response instanceof PsrResponse) {
-            $response = $this->isJsonEncodable($response)
+            $response = $this->isJsonSerializable($response)
                 ? (new Response(json_encode($response)))->psr() : (new Response())->psr();
         }
-        return $this->applyDefaultResponseHeaders($response);
+        return $this->decorateResponse($response);
     }
 }
