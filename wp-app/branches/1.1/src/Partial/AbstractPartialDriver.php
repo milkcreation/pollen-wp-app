@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Pollen\WpApp\Partial;
 
 use BadMethodCallException;
-use Error;
-use Pollen\WpApp\Support\Concerns\ParamsBagTrait;
-use Pollen\WpApp\View\ViewEngine;
-use Pollen\WpApp\View\ViewEngineInterface;
+use Pollen\Support\Concerns\ParamsBagTrait;
+use Pollen\View\ViewEngine;
+use Pollen\View\ViewEngineInterface;
+use Throwable;
 
 /**
- * @mixin \Pollen\WpApp\Support\ParamsBag
+ * @mixin \Pollen\Support\ParamsBag
  */
 abstract class AbstractPartialDriver
 {
@@ -34,7 +34,7 @@ abstract class AbstractPartialDriver
     {
         try {
             return $this->params()->{$method}(...$arguments);
-        } catch (Error $e) {
+        } catch (Throwable $e) {
             throw new BadMethodCallException(
                 sprintf(
                     'PartialDriver [%s] method call [%s] throws an exception: %s',
@@ -82,9 +82,8 @@ abstract class AbstractPartialDriver
 
         if ($name === null) {
             return $this->viewEngine;
-        } else {
-            return $this->viewEngine->render($name, $data);
         }
+        return $this->viewEngine->render($name, $data);
     }
 
     /**

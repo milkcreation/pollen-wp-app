@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Post;
 
-use Pollen\WpApp\Support\Arr;
-use Pollen\WpApp\Support\DateTime;
-use Pollen\WpApp\Support\ParamsBag;
-use Pollen\WpApp\Support\Str;
+use Pollen\Support\Arr;
+use Pollen\Support\DateTime;
+use Pollen\Support\ParamsBag;
+use Pollen\Support\Str;
 use Pollen\WpApp\Term\TermQuery;
 use Pollen\WpApp\User\UserQuery;
 use Pollen\WpApp\User\UserQueryInterface;

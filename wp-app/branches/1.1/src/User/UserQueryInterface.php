@@ -20,7 +20,7 @@ use WP_User_Query;
  * @property-read string user_status
  * @property-read string display_name
  *
- * @mixin \Pollen\WpApp\Support\ParamsBag
+ * @mixin \Pollen\Support\ParamsBag
  */
 interface UserQueryInterface
 {
