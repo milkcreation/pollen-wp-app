@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollen\WpApp;
 
 use Pollen\Http\RequestInterface;
+use Pollen\Partial\PartialDriverInterface;
+use Pollen\Partial\PartialInterface;
 use Pollen\Routing\RouterInterface;
 use Pollen\Validation\ValidatorInterface;
 use Pollen\WpApp\Post\PostQueryInterface;
@@ -27,18 +29,20 @@ use WP_User_Query;
 interface WpAppInterface
 {
     /**
-     * Récupération de l'instance.
-     *
-     * @return static
-     */
-    public static function instance(): WpAppInterface;
-
-    /**
      * Chargement.
      *
      * @return static
      */
     public function boot(): WpAppInterface;
+
+    /**
+     * Récupération du gestionnaire de partial ou instance d'un partial déclaré selon son alias.
+     *
+     * @param string|null $alias
+     *
+     * @return PartialInterface|PartialDriverInterface|null
+     */
+    public function partial(string $alias = null);
 
     /**
      * Instance du post courant ou associé à une définition.
