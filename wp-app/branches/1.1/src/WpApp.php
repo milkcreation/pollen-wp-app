@@ -9,6 +9,8 @@ use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
 use Pollen\Http\HttpServiceProvider;
 use Pollen\Http\RequestInterface;
+use Pollen\Partial\PartialInterface;
+use Pollen\Partial\PartialServiceProvider;
 use Pollen\Support\Concerns\BootableTrait;
 use Pollen\Support\Concerns\ConfigBagTrait;
 use Pollen\Support\DateTime;
@@ -41,11 +43,12 @@ class WpApp extends Container implements WpAppInterface
     private static $instance;
 
     /**
-     * Fournisseurs de services du conteneur d'injectections de dépendances
+     * Fournisseurs de services du conteneur d'injections de dépendances
      * @var string[]
      */
     protected $serviceProviders = [
         HttpServiceProvider::class,
+        PartialServiceProvider::class,
         RoutingServiceProvider::class,
         UserServiceProvider::class,
         ValidationServiceProvider::class,
@@ -74,7 +77,7 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public static function instance(): WpAppInterface
+    public static function instance(): self
     {
         if (self::$instance instanceof self) {
             return self::$instance;
@@ -139,6 +142,19 @@ class WpApp extends Container implements WpAppInterface
             $this->setBooted();
         }
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function partial(string $alias = null)
+    {
+        if ($this->has(PartialInterface::class)) {
+            $manager = $this->get(PartialInterface::class);
+
+            return $alias ? $manager->get($alias) : $manager;
+        }
+        return null;
     }
 
     /**
