@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
+use Exception;
 use League\Container\ReflectionContainer;
 use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
 use Pollen\Http\HttpServiceProvider;
+use Pollen\Http\Request;
 use Pollen\Http\RequestInterface;
 use Pollen\Partial\PartialInterface;
 use Pollen\Partial\PartialServiceProvider;
@@ -29,7 +31,6 @@ use Pollen\WpApp\User\UserServiceProvider;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use RuntimeException;
-use Throwable;
 
 class WpApp extends Container implements WpAppInterface
 {
@@ -101,7 +102,7 @@ class WpApp extends Container implements WpAppInterface
                 if (is_string($definition)) {
                     try {
                         $serviceProvider = new $definition();
-                    } catch (Throwable $e) {
+                    } catch (Exception $e) {
                         throw new RuntimeException(
                             'ServiceProvider [%s] instanciation return exception :%s',
                             $definition,
@@ -139,6 +140,51 @@ class WpApp extends Container implements WpAppInterface
             global $locale;
             DateTime::setLocale($locale);
 
+            if ($router = $this->router()) {
+                if ($fallback = $this->config('router.fallback')) {
+                    $router->setFallback($fallback);
+                }
+
+                add_action(
+                    'wp',
+                    function () use ($router) {
+                        $response = $router->handleRequest(Request::getFromGlobals());
+
+                        add_action('template_redirect', function () use ($router, $response) {
+                            $router->sendResponse($response);
+                            exit;
+                        });
+
+                        /* * /
+                        if (wp_using_themes() && $request->isMethod('GET')) {
+                            if (config('routing.remove_trailing_slash', true)) {
+                                $permalinks = get_option('permalink_structure');
+                                if (substr($permalinks, -1) == '/') {
+                                    update_option('permalink_structure', rtrim($permalinks, '/'));
+                                }
+
+                                $path = Request::getBaseUrl() . Request::getPathInfo();
+
+                                if (($path != '/') && (substr($path, -1) == '/')) {
+                                    $dispatcher = new Dispatcher($this->manager->getData());
+                                    $match = $dispatcher->dispatch($method, rtrim($path, '/'));
+
+                                    if ($match[0] === FastRoute::FOUND) {
+                                        $redirect_url = rtrim($path, '/');
+                                        $redirect_url .= ($qs = Request::getQueryString()) ? "?{$qs}" : '';
+
+                                        $response = HttpRedirect::createPsr($redirect_url);
+                                        $this->manager->emit($response);
+                                        exit;
+                                    }
+                                }
+                            }
+                        }
+                        /**/
+                    },
+                    25
+                );
+            }
             $this->setBooted();
         }
         return $this;
