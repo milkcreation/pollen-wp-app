@@ -29,11 +29,25 @@ use WP_User_Query;
 interface WpAppInterface
 {
     /**
+     * Récupération de l'instance courante.
+     *
+     * @return static
+     */
+    public static function instance(): WpAppInterface;
+
+    /**
      * Chargement.
      *
      * @return static
      */
     public function boot(): WpAppInterface;
+
+    /**
+     * Initialisation du conteneur d'injection de dépendances.
+     *
+     * @return void
+     */
+    public function bootContainer(): void;
 
     /**
      * Récupération du gestionnaire de partial ou instance de partial déclaré selon son alias.
@@ -63,20 +77,6 @@ interface WpAppInterface
      * @return PostQueryInterface[]|array
      */
     public function posts($query = null): array;
-
-    /**
-     * Instance de la requête HTTP globale au format PSR-7.
-     *
-     * @return PsrRequest|null
-     */
-    public function psrRequest(): ?PsrRequest;
-
-    /**
-     * Instance de la requête HTTP globale.
-     *
-     * @return RequestInterface|null
-     */
-    public function request(): ?RequestInterface;
 
     /**
      * Instance du gestionnaire de rôle utilisateurs.

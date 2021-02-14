@@ -9,8 +9,6 @@ use League\Container\ReflectionContainer;
 use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
 use Pollen\Http\HttpServiceProvider;
-use Pollen\Http\Request;
-use Pollen\Http\RequestInterface;
 use Pollen\Partial\PartialInterface;
 use Pollen\Partial\PartialServiceProvider;
 use Pollen\Support\Concerns\BootableTrait;
@@ -20,6 +18,7 @@ use Pollen\Routing\RoutingServiceProvider;
 use Pollen\Routing\RouterInterface;
 use Pollen\Validation\ValidationServiceProvider;
 use Pollen\Validation\ValidatorInterface;
+use Pollen\WpApp\Routing\Routing;
 use Pollen\WpApp\Post\PostQuery;
 use Pollen\WpApp\Post\PostQueryInterface;
 use Pollen\WpApp\Term\TermQuery;
@@ -29,7 +28,6 @@ use Pollen\WpApp\User\UserQueryInterface;
 use Pollen\WpApp\User\UserRoleManagerInterface;
 use Pollen\WpApp\User\UserServiceProvider;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use RuntimeException;
 
 class WpApp extends Container implements WpAppInterface
@@ -78,7 +76,7 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public static function instance(): self
+    public static function instance(): WpAppInterface
     {
         if (self::$instance instanceof self) {
             return self::$instance;
@@ -92,102 +90,68 @@ class WpApp extends Container implements WpAppInterface
     public function boot(): WpAppInterface
     {
         if (!$this->isBooted()) {
-            $this->delegate((new ReflectionContainer())->cacheResolutions());
-
-            $this->share('config', $this->config());
-
-            $this->serviceProviders += $this->config('service-providers', []);
-
-            foreach ($this->serviceProviders as $definition) {
-                if (is_string($definition)) {
-                    try {
-                        $serviceProvider = new $definition();
-                    } catch (Exception $e) {
-                        throw new RuntimeException(
-                            'ServiceProvider [%s] instanciation return exception :%s',
-                            $definition,
-                            $e->getMessage()
-                        );
-                    }
-                } elseif (is_object($definition)) {
-                    $serviceProvider = $definition;
-                } else {
-                    throw new RuntimeException(
-                        'ServiceProvider [%s] type not supported',
-                        $definition
-                    );
-                }
-
-                if (!$serviceProvider instanceof ServiceProviderInterface) {
-                    throw new RuntimeException(
-                        'ServiceProvider [%s] must be an instance of %s',
-                        $definition,
-                        ServiceProviderInterface::class
-                    );
-                }
-
-                $serviceProviders[] = $serviceProvider->setContainer($this);
-                $this->addServiceProvider($serviceProvider);
-            }
-
-            array_walk(
-                $serviceProviders,
-                function (ServiceProviderInterface $serviceProvider) {
-                    $serviceProvider->boot();
-                }
-            );
+            $this->bootContainer();
 
             global $locale;
             DateTime::setLocale($locale);
 
             if ($router = $this->router()) {
-                if ($fallback = $this->config('router.fallback')) {
-                    $router->setFallback($fallback);
-                }
-
-                add_action(
-                    'wp',
-                    function () use ($router) {
-                        $response = $router->handleRequest(Request::getFromGlobals());
-
-                        add_action('template_redirect', function () use ($router, $response) {
-                            $router->sendResponse($response);
-                            exit;
-                        });
-
-                        /* * /
-                        if (wp_using_themes() && $request->isMethod('GET')) {
-                            if (config('routing.remove_trailing_slash', true)) {
-                                $permalinks = get_option('permalink_structure');
-                                if (substr($permalinks, -1) == '/') {
-                                    update_option('permalink_structure', rtrim($permalinks, '/'));
-                                }
-
-                                $path = Request::getBaseUrl() . Request::getPathInfo();
-
-                                if (($path != '/') && (substr($path, -1) == '/')) {
-                                    $dispatcher = new Dispatcher($this->manager->getData());
-                                    $match = $dispatcher->dispatch($method, rtrim($path, '/'));
-
-                                    if ($match[0] === FastRoute::FOUND) {
-                                        $redirect_url = rtrim($path, '/');
-                                        $redirect_url .= ($qs = Request::getQueryString()) ? "?{$qs}" : '';
-
-                                        $response = HttpRedirect::createPsr($redirect_url);
-                                        $this->manager->emit($response);
-                                        exit;
-                                    }
-                                }
-                            }
-                        }
-                        /**/
-                    },
-                    25
-                );
+                new Routing($router, $this);
             }
+
             $this->setBooted();
         }
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function bootContainer(): void
+    {
+        $this->delegate((new ReflectionContainer())->cacheResolutions());
+
+        $this->share('config', $this->config());
+
+        $this->serviceProviders = array_merge($this->config('service-providers', []), $this->serviceProviders);
+        $bootableServiceProviders = [];
+
+        foreach ($this->serviceProviders as $definition) {
+            if (is_string($definition)) {
+                try {
+                    $serviceProvider = new $definition();
+                } catch (Exception $e) {
+                    throw new RuntimeException(
+                        'ServiceProvider [%s] instanciation return exception :%s',
+                        $definition,
+                        $e->getMessage()
+                    );
+                }
+            } elseif (is_object($definition)) {
+                $serviceProvider = $definition;
+            } else {
+                throw new RuntimeException(
+                    'ServiceProvider [%s] type not supported',
+                    $definition
+                );
+            }
+
+            if (!$serviceProvider instanceof ServiceProviderInterface) {
+                throw new RuntimeException(
+                    'ServiceProvider [%s] must be an instance of %s',
+                    $definition,
+                    ServiceProviderInterface::class
+                );
+            }
+
+            $bootableServiceProviders[] = $serviceProvider->setContainer($this);
+            $this->addServiceProvider($serviceProvider);
+        }
+
+        /** @var ServiceProviderInterface $serviceProvider */
+        foreach ($bootableServiceProviders as $serviceProvider) {
+            $serviceProvider->boot();
+        }
     }
 
     /**
@@ -206,17 +170,6 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public function psrRequest(): ?PsrRequest
-    {
-        if ($this->has(PsrRequest::class)) {
-            return $this->get(PsrRequest::class);
-        }
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function post($post = null): ?PostQueryInterface
     {
         return PostQuery::create($post);
@@ -228,17 +181,6 @@ class WpApp extends Container implements WpAppInterface
     public function posts($query = null): array
     {
         return PostQuery::fetch($query);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function request(): ?RequestInterface
-    {
-        if ($this->has(RequestInterface::class)) {
-            return $this->get(RequestInterface::class);
-        }
-        return null;
     }
 
     /**
