@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pollen\WpApp\Routing\Strategy;
+namespace Pollen\WpApp\Routing;
 
 use Pollen\Http\Response;
 use Pollen\Routing\Strategy\ApplicationStrategy;
@@ -96,7 +96,6 @@ class WpTemplateStrategy extends ApplicationStrategy
                 2
             );
         }
-
         return $this->decorateResponse(Response::createPsr()->withStatus(100));
     }
 

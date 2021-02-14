@@ -92,4 +92,14 @@ class WpFallbackController extends BaseController
         }
         return null;
     }
+
+    /**
+     * Répertoire des gabarits d'affichage.
+     *
+     * @return string
+     */
+    protected function viewEngineDirectory(): string
+    {
+        return get_template_directory();
+    }
 }
