@@ -1,10 +1,11 @@
 <?php
 
 use Pollen\WpApp\WpApp;
+use Pollen\WpApp\WpAppInterface;
 use Pollen\Partial\PartialDriverInterface;
 
 if (!function_exists('app')) {
-    function app(): WpApp
+    function app(): WpAppInterface
     {
         return WpApp::instance();
     }

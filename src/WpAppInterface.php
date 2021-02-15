@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
-use Pollen\Http\RequestInterface;
+use Pollen\Event\EventDispatcherInterface;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Partial\PartialDriverInterface;
 use Pollen\Partial\PartialInterface;
@@ -14,7 +14,6 @@ use Pollen\WpApp\Post\PostQueryInterface;
 use Pollen\WpApp\Term\TermQueryInterface;
 use Pollen\WpApp\User\UserQueryInterface;
 use Pollen\WpApp\User\UserRoleManagerInterface;
-use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use WP_Post;
 use WP_Query;
 use WP_Term;
@@ -51,6 +50,13 @@ interface WpAppInterface
     public function bootContainer(): void;
 
     /**
+     * Instance du répartiteur d'événements.
+     *
+     * @return EventDispatcherInterface
+     */
+    public function event(): EventDispatcherInterface;
+
+    /**
      * Instance du gestionnaire de journalisation|Journalisation d'un événement.
      *
      * @param string|null $message
@@ -60,7 +66,12 @@ interface WpAppInterface
      *
      * @return LogManagerInterface|null
      */
-    public function log(?string $message = null, $level = null, array $context = [], ?string $channel = null): ?LogManagerInterface;
+    public function log(
+        ?string $message = null,
+        $level = null,
+        array $context = [],
+        ?string $channel = null
+    ): ?LogManagerInterface;
 
     /**
      * Récupération du gestionnaire de partial ou instance de partial déclaré selon son alias.
