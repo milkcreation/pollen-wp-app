@@ -8,6 +8,8 @@ use Exception;
 use League\Container\ReflectionContainer;
 use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
+use Pollen\Event\EventDispatcherInterface;
+use Pollen\Event\EventServiceProvider;
 use Pollen\Http\HttpServiceProvider;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Log\LogServiceProvider;
@@ -48,8 +50,9 @@ class WpApp extends Container implements WpAppInterface
      * @var string[]
      */
     protected $serviceProviders = [
-        LogServiceProvider::class,
+        //EventServiceProvider::class,
         HttpServiceProvider::class,
+        LogServiceProvider::class,
         PartialServiceProvider::class,
         RoutingServiceProvider::class,
         UserServiceProvider::class,
@@ -160,6 +163,17 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
+    public function event():EventDispatcherInterface
+    {
+        if ($this->has(EventDispatcherInterface::class)) {
+            return $this->get(EventDispatcherInterface::class);
+        }
+        throw new RuntimeException('Unresolvable Event service');
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function log(?string $message = null, $level = null, array $context = [], ?string $channel = null): ?LogManagerInterface
     {
         if ($this->has(LogManagerInterface::class)) {
@@ -176,7 +190,7 @@ class WpApp extends Container implements WpAppInterface
 
             return null;
         }
-        throw new RuntimeException('Log service unresolvable');
+        throw new RuntimeException('Unresolvable Log service');
     }
 
     /**
@@ -189,7 +203,7 @@ class WpApp extends Container implements WpAppInterface
 
             return $alias ? $manager->get($alias, $idOrParams, $params) : $manager;
         }
-        throw new RuntimeException('Partial service unresolvable');
+        throw new RuntimeException('Unresolvable Partial service');
     }
 
     /**
@@ -216,7 +230,7 @@ class WpApp extends Container implements WpAppInterface
         if ($this->has(UserRoleManagerInterface::class)) {
             return $this->get(UserRoleManagerInterface::class);
         }
-        throw new RuntimeException('User Role service unresolvable');
+        throw new RuntimeException('Unresolvable UserRole service');
     }
 
     /**
@@ -227,7 +241,7 @@ class WpApp extends Container implements WpAppInterface
         if ($this->has(RouterInterface::class)) {
             return $this->get(RouterInterface::class);
         }
-        throw new RuntimeException('Routing service unresolvable');
+        throw new RuntimeException('Unresolvable Routing service');
     }
 
     /**
@@ -270,7 +284,7 @@ class WpApp extends Container implements WpAppInterface
         if ($this->has(ValidatorInterface::class)) {
             return $this->get(ValidatorInterface::class);
         }
-        throw new RuntimeException('Validation service unresolvable');
+        throw new RuntimeException('Unresolvable Validation service');
     }
 
     /**
