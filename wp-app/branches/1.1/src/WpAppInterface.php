@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollen\WpApp;
 
 use Pollen\Http\RequestInterface;
+use Pollen\Log\LogManagerInterface;
 use Pollen\Partial\PartialDriverInterface;
 use Pollen\Partial\PartialInterface;
 use Pollen\Routing\RouterInterface;
@@ -50,6 +51,18 @@ interface WpAppInterface
     public function bootContainer(): void;
 
     /**
+     * Instance du gestionnaire de journalisation|Journalisation d'un événement.
+     *
+     * @param string|null $message
+     * @param string|int|null $level
+     * @param array $context
+     * @param string|null $channel
+     *
+     * @return LogManagerInterface|null
+     */
+    public function log(?string $message = null, $level = null, array $context = [], ?string $channel = null): ?LogManagerInterface;
+
+    /**
      * Récupération du gestionnaire de partial ou instance de partial déclaré selon son alias.
      *
      * @param string|null $alias Alias de qualification|null pour l'instance du gestionnaire.
@@ -81,16 +94,16 @@ interface WpAppInterface
     /**
      * Instance du gestionnaire de rôle utilisateurs.
      *
-     * @return UserRoleManagerInterface|null
+     * @return UserRoleManagerInterface
      */
-    public function role(): ?UserRoleManagerInterface;
+    public function role(): UserRoleManagerInterface;
 
     /**
      * Instance du gestionnaire de routage.
      *
-     * @return RouterInterface|null
+     * @return RouterInterface
      */
-    public function router(): ?RouterInterface;
+    public function router(): RouterInterface;
 
     /**
      * Instance du terme de taxonomie courant ou associé à une définition.
@@ -131,7 +144,7 @@ interface WpAppInterface
     /**
      * Instance du gestionnaire de validation.
      *
-     * @return ValidatorInterface|null
+     * @return ValidatorInterface
      */
-    public function validator(): ?ValidatorInterface;
+    public function validator(): ValidatorInterface;
 }
