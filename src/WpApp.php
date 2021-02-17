@@ -8,6 +8,8 @@ use Exception;
 use League\Container\ReflectionContainer;
 use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
+use Pollen\Debug\DebugManagerInterface;
+use Pollen\Debug\DebugServiceProvider;
 use Pollen\Event\EventDispatcherInterface;
 use Pollen\Event\EventServiceProvider;
 use Pollen\Http\HttpServiceProvider;
@@ -22,6 +24,7 @@ use Pollen\Routing\RoutingServiceProvider;
 use Pollen\Routing\RouterInterface;
 use Pollen\Validation\ValidationServiceProvider;
 use Pollen\Validation\ValidatorInterface;
+use Pollen\WpApp\Debug\Debug;
 use Pollen\WpApp\Routing\Routing;
 use Pollen\WpApp\Post\PostQuery;
 use Pollen\WpApp\Post\PostQueryInterface;
@@ -50,7 +53,8 @@ class WpApp extends Container implements WpAppInterface
      * @var string[]
      */
     protected $serviceProviders = [
-        //EventServiceProvider::class,
+        DebugServiceProvider::class,
+        EventServiceProvider::class,
         HttpServiceProvider::class,
         LogServiceProvider::class,
         PartialServiceProvider::class,
@@ -100,6 +104,10 @@ class WpApp extends Container implements WpAppInterface
 
             global $locale;
             DateTime::setLocale($locale);
+
+            if ($this->has(DebugManagerInterface::class)) {
+                new Debug($this->get(DebugManagerInterface::class), $this);
+            }
 
             if ($router = $this->router()) {
                 new Routing($router, $this);
