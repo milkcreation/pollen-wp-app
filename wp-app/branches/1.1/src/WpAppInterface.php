@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
+use Pollen\Cookie\CookieJarInterface;
 use Pollen\Event\EventDispatcherInterface;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Partial\PartialDriverInterface;
@@ -48,6 +49,31 @@ interface WpAppInterface
      * @return void
      */
     public function bootContainer(): void;
+
+    /**
+     * Instance du gestionnaire d'instance de cookie.
+     *
+     * @return CookieJarInterface
+     */
+    public function cookie(): CookieJarInterface;
+
+    /**
+     * Decryptage d'une chaîne de caractères.
+     *
+     * @param string $hash
+     *
+     * @return string
+     */
+    public function decrypt(string $hash): string;
+
+    /**
+     * Encryptage d'une chaîne de caractères.
+     *
+     * @param string $plain
+     *
+     * @return string
+     */
+    public function encrypt(string $plain): string;
 
     /**
      * Instance du répartiteur d'événements.
