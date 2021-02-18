@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Debug;
 
-use Pollen\WpApp\WpAppInterface;
 use Pollen\Debug\DebugManagerInterface;
+use Pollen\WpApp\WpAppInterface;
+use Pollen\Support\Env;
 
 class Debug
 {
@@ -28,22 +29,27 @@ class Debug
         $this->debug = $debug;
         $this->app = $app;
 
-        add_action(
-            'wp_head',
-            function () {
-                echo "<!-- DebugBar -->";
-                echo $this->debug->debugBar()->renderHead();
-                echo "<!-- / DebugBar -->";
-            },
-            999999
-        );
+        if (Env::isDev()) {
+            $this->debug->errorHandler()->enable();
+            $this->debug->debugBar()->enable();
 
-        add_action(
-            'wp_footer',
-            function () {
-                echo $this->debug->debugBar()->render();
-            },
-            999999
-        );
+            add_action(
+                'wp_head',
+                function () {
+                    echo "<!-- DebugBar -->";
+                    echo $this->debug->debugBar()->renderHead();
+                    echo "<!-- / DebugBar -->";
+                },
+                999999
+            );
+
+            add_action(
+                'wp_footer',
+                function () {
+                    echo $this->debug->debugBar()->render();
+                },
+                999999
+            );
+        }
     }
 }

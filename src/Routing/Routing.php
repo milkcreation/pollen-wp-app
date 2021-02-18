@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Routing;
 
+use InvalidArgumentException;
+use Pollen\Cookie\CookieJarInterface;
 use Pollen\Http\Request;
 use Pollen\WpApp\WpAppInterface;
 use Pollen\Routing\RouterInterface;
@@ -33,11 +35,15 @@ class Routing
             $this->router->setFallback($fallback);
         }
 
+        if ($this->app->has(CookieJarInterface::class)) {
+            $this->router->middle('queued-cookies');
+        }
+
         add_action(
             'wp',
-            function () use ($router) {
+            function () {
                 $request = Request::getFromGlobals();
-                $response = $router->handleRequest(Request::getFromGlobals());
+                $response = $this->router->handleRequest(Request::getFromGlobals());
 
                 add_action('template_redirect', function () use ($request, $response) {
                     $this->router->sendResponse($response);

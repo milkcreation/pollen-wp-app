@@ -8,8 +8,12 @@ use Exception;
 use League\Container\ReflectionContainer;
 use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
+use Pollen\Cookie\CookieJarInterface;
+use Pollen\Cookie\CookieServiceProvider;
 use Pollen\Debug\DebugManagerInterface;
 use Pollen\Debug\DebugServiceProvider;
+use Pollen\Encryption\EncrypterInterface;
+use Pollen\Encryption\EncryptionServiceProvider;
 use Pollen\Event\EventDispatcherInterface;
 use Pollen\Event\EventServiceProvider;
 use Pollen\Http\HttpServiceProvider;
@@ -53,7 +57,9 @@ class WpApp extends Container implements WpAppInterface
      * @var string[]
      */
     protected $serviceProviders = [
+        CookieServiceProvider::class,
         DebugServiceProvider::class,
+        EncryptionServiceProvider::class,
         EventServiceProvider::class,
         HttpServiceProvider::class,
         LogServiceProvider::class,
@@ -171,7 +177,46 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public function event():EventDispatcherInterface
+    public function cookie(): CookieJarInterface
+    {
+        if ($this->has(CookieJarInterface::class)) {
+            return $this->get(CookieJarInterface::class);
+        }
+        throw new RuntimeException('Unresolvable CookieJar service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function decrypt(string $hash): string
+    {
+        if ($this->has(EncrypterInterface::class)) {
+            /** @var EncrypterInterface $encrypter */
+            $encrypter = $this->get(EncrypterInterface::class);
+
+            return $encrypter->decrypt($hash);
+        }
+        throw new RuntimeException('Unresolvable Encryption service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function encrypt(string $plain): string
+    {
+        if ($this->has(EncrypterInterface::class)) {
+            /** @var EncrypterInterface $encrypter */
+            $encrypter = $this->get(EncrypterInterface::class);
+
+            return $encrypter->encrypt($plain);
+        }
+        throw new RuntimeException('Unresolvable Encryption service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function event(): EventDispatcherInterface
     {
         if ($this->has(EventDispatcherInterface::class)) {
             return $this->get(EventDispatcherInterface::class);
@@ -182,8 +227,12 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public function log(?string $message = null, $level = null, array $context = [], ?string $channel = null): ?LogManagerInterface
-    {
+    public function log(
+        ?string $message = null,
+        $level = null,
+        array $context = [],
+        ?string $channel = null
+    ): ?LogManagerInterface {
         if ($this->has(LogManagerInterface::class)) {
             /** @var LogManagerInterface $manager */
             $manager = $this->get(LogManagerInterface::class);
