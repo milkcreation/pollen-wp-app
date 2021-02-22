@@ -6,9 +6,11 @@ namespace Pollen\WpApp;
 
 use Pollen\Cookie\CookieJarInterface;
 use Pollen\Event\EventDispatcherInterface;
+use Pollen\Filesystem\FilesystemInterface;
+use Pollen\Filesystem\StorageManagerInterface;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Partial\PartialDriverInterface;
-use Pollen\Partial\PartialInterface;
+use Pollen\Partial\PartialManagerInterface;
 use Pollen\Routing\RouterInterface;
 use Pollen\Validation\ValidatorInterface;
 use Pollen\WpApp\Post\PostQueryInterface;
@@ -83,6 +85,17 @@ interface WpAppInterface
     public function event(): EventDispatcherInterface;
 
     /**
+     * Récupération du gestionnaire de champ ou instance d'un champ déclaré selon son alias.
+     *
+     * @param string|null $alias Alias de qualification|null pour l'instance du gestionnaire.
+     * @param mixed $idOrParams Identifiant de qualification|Liste des attributs de configuration.
+     * @param array $params Liste des attributs de configuration.
+     *
+     * @return PartialManagerInterface|PartialDriverInterface|null
+     */
+    public function field(?string $alias = null, $idOrParams = null, array $params = []);
+
+    /**
      * Instance du gestionnaire de journalisation|Journalisation d'un événement.
      *
      * @param string|null $message
@@ -100,13 +113,14 @@ interface WpAppInterface
     ): ?LogManagerInterface;
 
     /**
-     * Récupération du gestionnaire de partial ou instance de partial déclaré selon son alias.
+     * Récupération du gestionnaire de portions d'affichage ou instance d'une portion d'affichage déclarée selon son
+     * alias.
      *
      * @param string|null $alias Alias de qualification|null pour l'instance du gestionnaire.
      * @param mixed $idOrParams Identifiant de qualification|Liste des attributs de configuration.
      * @param array $params Liste des attributs de configuration.
      *
-     * @return PartialInterface|PartialDriverInterface|null
+     * @return PartialManagerInterface|PartialDriverInterface|null
      */
     public function partial(?string $alias = null, $idOrParams = null, array $params = []);
 
@@ -141,6 +155,15 @@ interface WpAppInterface
      * @return RouterInterface
      */
     public function router(): RouterInterface;
+
+    /**
+     * Récupération du gestionnaire des système de fichiers ou instance d'un système de fichier déclaré.
+     *
+     * @param string|null $name
+     *
+     * @return StorageManagerInterface|FilesystemInterface|null
+     */
+    public function storage(?string $name = null);
 
     /**
      * Instance du terme de taxonomie courant ou associé à une définition.
