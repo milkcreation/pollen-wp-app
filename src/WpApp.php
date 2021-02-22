@@ -16,10 +16,14 @@ use Pollen\Encryption\EncrypterInterface;
 use Pollen\Encryption\EncryptionServiceProvider;
 use Pollen\Event\EventDispatcherInterface;
 use Pollen\Event\EventServiceProvider;
+use Pollen\Field\FieldManagerInterface;
+use Pollen\Field\FieldServiceProvider;
+use Pollen\Filesystem\FilesystemServiceProvider;
+use Pollen\Filesystem\StorageManagerInterface;
 use Pollen\Http\HttpServiceProvider;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Log\LogServiceProvider;
-use Pollen\Partial\PartialInterface;
+use Pollen\Partial\PartialManagerInterface;
 use Pollen\Partial\PartialServiceProvider;
 use Pollen\Support\Concerns\BootableTrait;
 use Pollen\Support\Concerns\ConfigBagTrait;
@@ -61,6 +65,8 @@ class WpApp extends Container implements WpAppInterface
         DebugServiceProvider::class,
         EncryptionServiceProvider::class,
         EventServiceProvider::class,
+        FieldServiceProvider::class,
+        FilesystemServiceProvider::class,
         HttpServiceProvider::class,
         LogServiceProvider::class,
         PartialServiceProvider::class,
@@ -227,6 +233,19 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
+    public function field(?string $alias = null, $idOrParams = null, array $params = [])
+    {
+        if ($this->has(FieldManagerInterface::class)) {
+            $manager = $this->get(FieldManagerInterface::class);
+
+            return $alias ? $manager->get($alias, $idOrParams, $params) : $manager;
+        }
+        throw new RuntimeException('Unresolvable Field service');
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function log(
         ?string $message = null,
         $level = null,
@@ -255,8 +274,8 @@ class WpApp extends Container implements WpAppInterface
      */
     public function partial(?string $alias = null, $idOrParams = null, array $params = [])
     {
-        if ($this->has(PartialInterface::class)) {
-            $manager = $this->get(PartialInterface::class);
+        if ($this->has(PartialManagerInterface::class)) {
+            $manager = $this->get(PartialManagerInterface::class);
 
             return $alias ? $manager->get($alias, $idOrParams, $params) : $manager;
         }
@@ -299,6 +318,19 @@ class WpApp extends Container implements WpAppInterface
             return $this->get(RouterInterface::class);
         }
         throw new RuntimeException('Unresolvable Routing service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function storage(?string $name = null)
+    {
+        if ($this->has(StorageManagerInterface::class)) {
+            $manager = $this->get(StorageManagerInterface::class);
+
+            return $name ? $manager->disk($name) : $manager;
+        }
+        throw new RuntimeException('Unresolvable Filesystem service');
     }
 
     /**
