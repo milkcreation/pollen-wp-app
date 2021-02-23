@@ -6,6 +6,8 @@ namespace Pollen\WpApp;
 
 use Pollen\Cookie\CookieJarInterface;
 use Pollen\Event\EventDispatcherInterface;
+use Pollen\Field\FieldDriverInterface;
+use Pollen\Field\FieldManagerInterface;
 use Pollen\Filesystem\FilesystemInterface;
 use Pollen\Filesystem\StorageManagerInterface;
 use Pollen\Log\LogManagerInterface;
@@ -91,7 +93,7 @@ interface WpAppInterface
      * @param mixed $idOrParams Identifiant de qualification|Liste des attributs de configuration.
      * @param array $params Liste des attributs de configuration.
      *
-     * @return PartialManagerInterface|PartialDriverInterface|null
+     * @return FieldManagerInterface|FieldDriverInterface|null
      */
     public function field(?string $alias = null, $idOrParams = null, array $params = []);
 
