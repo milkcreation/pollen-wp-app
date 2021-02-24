@@ -20,11 +20,14 @@ use Pollen\Field\FieldManagerInterface;
 use Pollen\Field\FieldServiceProvider;
 use Pollen\Filesystem\FilesystemServiceProvider;
 use Pollen\Filesystem\StorageManagerInterface;
+use Pollen\Http\RequestInterface;
 use Pollen\Http\HttpServiceProvider;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Log\LogServiceProvider;
 use Pollen\Partial\PartialManagerInterface;
 use Pollen\Partial\PartialServiceProvider;
+use Pollen\Session\SessionManagerInterface;
+use Pollen\Session\SessionServiceProvider;
 use Pollen\Support\Concerns\BootableTrait;
 use Pollen\Support\Concerns\ConfigBagTrait;
 use Pollen\Support\DateTime;
@@ -71,6 +74,7 @@ class WpApp extends Container implements WpAppInterface
         LogServiceProvider::class,
         PartialServiceProvider::class,
         RoutingServiceProvider::class,
+        SessionServiceProvider::class,
         UserServiceProvider::class,
         ValidationServiceProvider::class,
     ];
@@ -116,6 +120,17 @@ class WpApp extends Container implements WpAppInterface
 
             global $locale;
             DateTime::setLocale($locale);
+
+            if ($this->has(SessionManagerInterface::class)) {
+                /** @var SessionManagerInterface $session */
+                $session = $this->get(SessionManagerInterface::class);
+
+                try {
+                    $session->start();
+                } catch (RuntimeException $e) {
+                    throw $e;
+                }
+            }
 
             if ($this->has(DebugManagerInterface::class)) {
                 new Debug($this->get(DebugManagerInterface::class), $this);
