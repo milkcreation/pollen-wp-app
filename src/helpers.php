@@ -30,7 +30,7 @@ if (!function_exists('field')) {
 
 if (!function_exists('partial')) {
     /**
-     * Instance de portions d'affichage.
+     * Instance de portion d'affichage.
      *
      * @param string|null $alias Alias de qualification.
      * @param mixed $idOrParams Identifiant de qualification|Liste des attributs de configuration.

@@ -20,7 +20,8 @@ use Pollen\Field\FieldManagerInterface;
 use Pollen\Field\FieldServiceProvider;
 use Pollen\Filesystem\FilesystemServiceProvider;
 use Pollen\Filesystem\StorageManagerInterface;
-use Pollen\Http\RequestInterface;
+use Pollen\Form\FormManagerInterface;
+use Pollen\Form\FormServiceProvider;
 use Pollen\Http\HttpServiceProvider;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Log\LogServiceProvider;
@@ -29,7 +30,7 @@ use Pollen\Partial\PartialServiceProvider;
 use Pollen\Session\SessionManagerInterface;
 use Pollen\Session\SessionServiceProvider;
 use Pollen\Support\Concerns\BootableTrait;
-use Pollen\Support\Concerns\ConfigBagTrait;
+use Pollen\Support\Concerns\ConfigBagAwareTrait;
 use Pollen\Support\DateTime;
 use Pollen\Routing\RoutingServiceProvider;
 use Pollen\Routing\RouterInterface;
@@ -51,7 +52,7 @@ use RuntimeException;
 class WpApp extends Container implements WpAppInterface
 {
     use BootableTrait;
-    use ConfigBagTrait;
+    use ConfigBagAwareTrait;
 
     /**
      * Instance de la classe.
@@ -70,6 +71,7 @@ class WpApp extends Container implements WpAppInterface
         EventServiceProvider::class,
         FieldServiceProvider::class,
         FilesystemServiceProvider::class,
+        FormServiceProvider::class,
         HttpServiceProvider::class,
         LogServiceProvider::class,
         PartialServiceProvider::class,
@@ -150,7 +152,7 @@ class WpApp extends Container implements WpAppInterface
      */
     public function bootContainer(): void
     {
-        $this->delegate((new ReflectionContainer())->cacheResolutions());
+        $this->enableAutoWiring(true);
 
         $this->share('config', $this->config());
 
@@ -251,11 +253,26 @@ class WpApp extends Container implements WpAppInterface
     public function field(?string $alias = null, $idOrParams = null, array $params = [])
     {
         if ($this->has(FieldManagerInterface::class)) {
+            /** @var FieldManagerInterface $manager */
             $manager = $this->get(FieldManagerInterface::class);
 
-            return $alias ? $manager->get($alias, $idOrParams, $params) : $manager;
+            return $alias !== null ? $manager->get($alias, $idOrParams, $params) : $manager;
         }
         throw new RuntimeException('Unresolvable Field service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function form(?string $alias = null)
+    {
+        if ($this->has(FormManagerInterface::class)) {
+            /** @var FormManagerInterface $manager */
+            $manager = $this->get(FormManagerInterface::class);
+
+            return $alias !== null ? $manager->get($alias) : $manager;
+        }
+        throw new RuntimeException('Unresolvable Form Manager service');
     }
 
     /**
@@ -290,9 +307,10 @@ class WpApp extends Container implements WpAppInterface
     public function partial(?string $alias = null, $idOrParams = null, array $params = [])
     {
         if ($this->has(PartialManagerInterface::class)) {
+            /** @var PartialManagerInterface $manager */
             $manager = $this->get(PartialManagerInterface::class);
 
-            return $alias ? $manager->get($alias, $idOrParams, $params) : $manager;
+            return $alias !== null ? $manager->get($alias, $idOrParams, $params) : $manager;
         }
         throw new RuntimeException('Unresolvable Partial service');
     }
