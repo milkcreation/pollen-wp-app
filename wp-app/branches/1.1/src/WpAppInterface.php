@@ -10,6 +10,8 @@ use Pollen\Field\FieldDriverInterface;
 use Pollen\Field\FieldManagerInterface;
 use Pollen\Filesystem\FilesystemInterface;
 use Pollen\Filesystem\StorageManagerInterface;
+use Pollen\Form\FormManagerInterface;
+use Pollen\Form\FormInterface;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Partial\PartialDriverInterface;
 use Pollen\Partial\PartialManagerInterface;
@@ -29,7 +31,7 @@ use WP_User_Query;
 /**
  * @mixin \Pollen\Container\Container
  * @mixin \Pollen\Support\Concerns\BootableTrait
- * @mixin \Pollen\Support\Concerns\ConfigBagTrait
+ * @mixin \Pollen\Support\Concerns\ConfigBagAwareTrait
  */
 interface WpAppInterface
 {
@@ -96,6 +98,15 @@ interface WpAppInterface
      * @return FieldManagerInterface|FieldDriverInterface|null
      */
     public function field(?string $alias = null, $idOrParams = null, array $params = []);
+
+    /**
+     * Récupération du gestionnaire de formulaire ou instance d'un formulaire déclaré.
+     *
+     * @param string|null $alias Alias de qualification du formulaire.
+     *
+     * @return FormManagerInterface|FormInterface|null
+     */
+    public function form(?string $alias = null);
 
     /**
      * Instance du gestionnaire de journalisation|Journalisation d'un événement.
