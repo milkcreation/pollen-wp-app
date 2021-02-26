@@ -37,6 +37,7 @@
     "pollen-solutions/form": "^1.0",
     "pollen-solutions/http": "^1.0",
     "pollen-solutions/log": "^1.0",
+    "pollen-solutions/mail": "^1.0",
     "pollen-solutions/partial": "^1.0",
     "pollen-solutions/routing": "^1.0",
     "pollen-solutions/session": "^1.0",
