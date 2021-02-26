@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\User;
 
-/**
- * @mixin \Pollen\Support\Concerns\ContainerAwareTrait
- */
-interface UserRoleManagerInterface
+use Pollen\Support\Proxy\ContainerProxyInterface;
+
+interface UserRoleManagerInterface extends ContainerProxyInterface
 {
     /**
      * Récupération d'une instance de rôle déclaré.

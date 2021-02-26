@@ -89,7 +89,8 @@ class PostQuery extends ParamsBag implements PostQueryInterface
     public function __construct(?WP_Post $wp_post = null)
     {
         if ($this->wpPost = $wp_post instanceof WP_Post ? $wp_post : null) {
-            $this->set($this->wpPost->to_array())->parse();
+            $this->set($this->wpPost->to_array());
+            $this->parse();
         }
     }
 

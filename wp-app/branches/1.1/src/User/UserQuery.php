@@ -70,7 +70,8 @@ class UserQuery extends ParamsBag implements UserQueryInterface
     public function __construct(?WP_User $wp_user = null)
     {
         if ($this->wpUser = $wp_user instanceof WP_User ? $wp_user : null) {
-            $this->set($this->wpUser->to_array())->parse();
+            $this->set($this->wpUser->to_array());
+            $this->parse();
         }
     }
 

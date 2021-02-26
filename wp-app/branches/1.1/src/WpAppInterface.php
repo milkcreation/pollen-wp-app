@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
+use Pollen\Container\ContainerInterface;
 use Pollen\Cookie\CookieJarInterface;
 use Pollen\Event\EventDispatcherInterface;
 use Pollen\Field\FieldDriverInterface;
@@ -16,6 +17,8 @@ use Pollen\Log\LogManagerInterface;
 use Pollen\Partial\PartialDriverInterface;
 use Pollen\Partial\PartialManagerInterface;
 use Pollen\Routing\RouterInterface;
+use Pollen\Support\Concerns\BootableTraitInterface;
+use Pollen\Support\Concerns\ConfigBagAwareTraitInterface;
 use Pollen\Validation\ValidatorInterface;
 use Pollen\WpApp\Post\PostQueryInterface;
 use Pollen\WpApp\Term\TermQueryInterface;
@@ -28,12 +31,7 @@ use WP_Term_Query;
 use WP_User;
 use WP_User_Query;
 
-/**
- * @mixin \Pollen\Container\Container
- * @mixin \Pollen\Support\Concerns\BootableTrait
- * @mixin \Pollen\Support\Concerns\ConfigBagAwareTrait
- */
-interface WpAppInterface
+interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInterface, ContainerInterface
 {
     /**
      * Récupération de l'instance courante.

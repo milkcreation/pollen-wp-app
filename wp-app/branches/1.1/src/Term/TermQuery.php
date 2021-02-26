@@ -69,7 +69,8 @@ class TermQuery extends ParamsBag implements TermQueryInterface
     public function __construct(?WP_Term $wp_term = null)
     {
         if ($this->wpTerm = $wp_term instanceof WP_Term ? $wp_term : null) {
-            $this->set($this->wpTerm->to_array())->parse();
+            $this->set($this->wpTerm->to_array());
+            $this->parse();
         }
     }
 
