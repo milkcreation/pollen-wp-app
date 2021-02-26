@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\User;
 
-use Pollen\Support\Concerns\ContainerAwareTrait;
+use Pollen\Support\Proxy\ContainerProxy;
 use Psr\Container\ContainerInterface as Container;
 
 class UserRoleManager implements UserRoleManagerInterface
 {
-    use ContainerAwareTrait;
+    use ContainerProxy;
 
     /**
      * Liste des roles déclarés.

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Term;
 
+use Pollen\Support\ParamsBagInterface;
 use WP_Term;
 use WP_Term_Query;
 
@@ -18,10 +19,8 @@ use WP_Term_Query;
  * @property-read int $parent
  * @property-read int $count
  * @property-read string $filter
- *
- * @mixin \Pollen\Support\ParamsBag
  */
-interface TermQueryInterface
+interface TermQueryInterface extends ParamsBagInterface
 {
     /**
      * Création d'une instance basée sur un objet post Wordpress et selon la cartographie des classes de rappel.

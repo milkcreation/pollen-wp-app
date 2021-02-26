@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\User;
 
+use Pollen\Support\ParamsBagInterface;
 use WP_Site;
 use WP_User;
 use WP_User_Query;
@@ -19,10 +20,8 @@ use WP_User_Query;
  * @property-read string user_activation_key
  * @property-read string user_status
  * @property-read string display_name
- *
- * @mixin \Pollen\Support\ParamsBag
  */
-interface UserQueryInterface
+interface UserQueryInterface extends ParamsBagInterface
 {
     /**
      * Création d'une instance basée sur un objet post Wordpress et selon la cartographie des classes de rappel.

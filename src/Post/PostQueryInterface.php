@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollen\WpApp\Post;
 
 use Pollen\Support\DateTime;
+use Pollen\Support\ParamsBagInterface;
 use Pollen\WpApp\Term\TermQueryInterface;
 use Pollen\WpApp\User\UserQueryInterface;
 use WP_Post;
@@ -36,10 +37,8 @@ use WP_Term;
  * @property-read string $post_mime_type
  * @property-read int $comment_count
  * @property-read string $filter
- *
- * @mixin \Pollen\Support\ParamsBag
  */
-interface PostQueryInterface
+interface PostQueryInterface extends ParamsBagInterface
 {
     /**
      * Création d'une instance basée sur un objet post Wordpress et selon la cartographie des classes de rappel.
