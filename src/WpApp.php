@@ -130,7 +130,8 @@ class WpApp extends Container implements WpAppInterface
                 try {
                     $session->start();
                 } catch (RuntimeException $e) {
-                    throw $e;
+                    //throw $e;
+                    unset($e);
                 }
             }
 
