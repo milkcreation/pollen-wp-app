@@ -8,7 +8,7 @@
     "wordpress",
     "micro framework"
   ],
-  "time": "2021-02-26",
+  "time": "2021-02-28",
   "license": "MIT",
   "authors": [
     {
@@ -29,6 +29,7 @@
     "composer/installers": "~1.0",
     "pollen-solutions/container": "^1.0",
     "pollen-solutions/cookie": "^1.0",
+    "pollen-solutions/database": "^1.0",
     "pollen-solutions/debug": "^1.0",
     "pollen-solutions/encryption": "^1.0",
     "pollen-solutions/event": "^1.0",

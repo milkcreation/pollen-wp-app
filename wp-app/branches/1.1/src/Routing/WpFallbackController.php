@@ -86,9 +86,14 @@ class WpFallbackController extends BaseController
                 '',
                 $template
             );
-            return $this->response(
-                (new ViewEngine(get_template_directory()))->render(pathinfo($template, PATHINFO_FILENAME))
-            );
+
+            $viewEngine = new ViewEngine();
+            if ($container = $this->getContainer()) {
+                $viewEngine->setContainer($container);
+            }
+            $viewEngine->setDirectory(get_template_directory());
+
+            return $this->response($viewEngine->render(pathinfo($template, PATHINFO_FILENAME)));
         }
         return null;
     }
