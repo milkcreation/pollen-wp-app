@@ -225,6 +225,18 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
+    public function debug(): DebugManagerInterface
+    {
+        if ($this->has(DebugManagerInterface::class)) {
+            /** @var DebugManagerInterface $encrypter */
+            return $this->get(DebugManagerInterface::class);
+        }
+        throw new RuntimeException('Unresolvable Encryption service');
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function decrypt(string $hash): string
     {
         if ($this->has(EncrypterInterface::class)) {

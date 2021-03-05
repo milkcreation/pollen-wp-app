@@ -29,27 +29,32 @@ class Debug
         $this->debug = $debug;
         $this->app = $app;
 
-        if (Env::isDev()) {
-            $this->debug->errorHandler()->enable();
-            $this->debug->debugBar()->enable();
+        add_action('after_setup_theme', function () {
+            if ($this->debug->config('handler', Env::isDev())) {
+                $this->debug->errorHandler()->enable();
+            }
 
-            add_action(
-                'wp_head',
-                function () {
-                    echo "<!-- DebugBar -->";
-                    echo $this->debug->debugBar()->renderHead();
-                    echo "<!-- / DebugBar -->";
-                },
-                999999
-            );
+            if ($this->debug->config('debug-bar', Env::isDev())) {
+                $this->debug->debugBar()->enable();
 
-            add_action(
-                'wp_footer',
-                function () {
-                    echo $this->debug->debugBar()->render();
-                },
-                999999
-            );
-        }
+                add_action(
+                    'wp_head',
+                    function () {
+                        echo "<!-- DebugBar -->";
+                        echo $this->debug->debugBar()->renderHead();
+                        echo "<!-- / DebugBar -->";
+                    },
+                    999999
+                );
+
+                add_action(
+                    'wp_footer',
+                    function () {
+                        echo $this->debug->debugBar()->render();
+                    },
+                    999999
+                );
+            }
+        });
     }
 }
