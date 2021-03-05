@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Pollen\WpApp;
 
 use Exception;
-use League\Container\ReflectionContainer;
 use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
 use Pollen\Cookie\CookieJarInterface;
@@ -36,6 +35,7 @@ use Pollen\Routing\RoutingServiceProvider;
 use Pollen\Routing\RouterInterface;
 use Pollen\Validation\ValidationServiceProvider;
 use Pollen\Validation\ValidatorInterface;
+use Pollen\WpApp\Cookie\CookieJar;
 use Pollen\WpApp\Debug\Debug;
 use Pollen\WpApp\Routing\Routing;
 use Pollen\WpApp\Post\PostQuery;
@@ -139,8 +139,18 @@ class WpApp extends Container implements WpAppInterface
                 new Debug($this->get(DebugManagerInterface::class), $this);
             }
 
-            if ($router = $this->router()) {
+            try {
+                $router = $this->router();
                 new Routing($router, $this);
+            } catch(RuntimeException $e) {
+                unset($e);
+            }
+
+            try {
+                $cookieJar = $this->cookie();
+                new CookieJar($cookieJar, $this);
+            } catch(RuntimeException $e) {
+                unset($e);
             }
 
             $this->setBooted();
@@ -201,10 +211,13 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public function cookie(): CookieJarInterface
+    public function cookie(?string $alias = null, array $args = [])
     {
         if ($this->has(CookieJarInterface::class)) {
-            return $this->get(CookieJarInterface::class);
+            /** @var CookieJarInterface $cookieJar */
+            $cookieJar = $this->get(CookieJarInterface::class);
+
+            return $alias === null ? $cookieJar : $cookieJar->make($alias, $args);
         }
         throw new RuntimeException('Unresolvable CookieJar service');
     }

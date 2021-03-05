@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollen\WpApp;
 
 use Pollen\Container\ContainerInterface;
+use Pollen\Cookie\CookieInterface;
 use Pollen\Cookie\CookieJarInterface;
 use Pollen\Event\EventDispatcherInterface;
 use Pollen\Field\FieldDriverInterface;
@@ -55,11 +56,14 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
     public function bootContainer(): void;
 
     /**
-     * Instance du gestionnaire d'instance de cookie.
+     * Instance du gestionnaire d'instance de cookies|Instance d'un cookie.
      *
-     * @return CookieJarInterface
+     * @param string|null $alias
+     * @param array $args
+     *
+     * @return CookieJarInterface|CookieInterface
      */
-    public function cookie(): CookieJarInterface;
+    public function cookie(?string $alias = null, array $args = []);
 
     /**
      * Decryptage d'une chaîne de caractères.
