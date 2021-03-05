@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Routing;
 
-use Pollen\Cookie\CookieJarInterface;
-use Pollen\Http\Request;
+use Pollen\Support\Proxy\HttpRequestProxy;
 use Pollen\WpApp\WpAppInterface;
 use Pollen\Routing\RouterInterface;
 
 class Routing
 {
+    use HttpRequestProxy;
+
     /**
      * @var RouterInterface
      */
@@ -34,20 +35,14 @@ class Routing
             $this->router->setFallback($fallback);
         }
 
-        if ($this->app->has(CookieJarInterface::class)) {
-            $this->router->middle('queued-cookies');
-        }
-
         add_action(
-            'wp',
+            'template_redirect',
             function () {
-                $request = Request::getFromGlobals();
-                $response = $this->router->handleRequest(Request::getFromGlobals());
+                $request = $this->httpRequest();
+                $response = $this->router->handleRequest($request);
 
-                add_action('template_redirect', function () use ($request, $response) {
-                    $this->router->sendResponse($response);
-                    $this->router->terminateEvent($request, $response);
-                });
+                $this->router->sendResponse($response);
+                $this->router->terminateEvent($request, $response);
 
                 /* * /
                 if (wp_using_themes() && $request->isMethod('GET')) {

@@ -7,6 +7,7 @@ namespace Pollen\WpApp;
 use Pollen\Container\ContainerInterface;
 use Pollen\Cookie\CookieInterface;
 use Pollen\Cookie\CookieJarInterface;
+use Pollen\Debug\DebugManagerInterface;
 use Pollen\Event\EventDispatcherInterface;
 use Pollen\Field\FieldDriverInterface;
 use Pollen\Field\FieldManagerInterface;
@@ -66,7 +67,14 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
     public function cookie(?string $alias = null, array $args = []);
 
     /**
-     * Decryptage d'une chaîne de caractères.
+     * Instance du gestionnaire de débogage.
+     *
+     * @return DebugManagerInterface
+     */
+    public function debug(): DebugManagerInterface;
+
+    /**
+     * Décryptage d'une chaîne de caractères.
      *
      * @param string $hash
      *
