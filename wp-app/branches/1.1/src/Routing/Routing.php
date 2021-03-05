@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Routing;
 
-use InvalidArgumentException;
 use Pollen\Cookie\CookieJarInterface;
 use Pollen\Http\Request;
 use Pollen\WpApp\WpAppInterface;
@@ -13,12 +12,12 @@ use Pollen\Routing\RouterInterface;
 class Routing
 {
     /**
-     * @var RouterInterface;
+     * @var RouterInterface
      */
     protected $router;
 
     /**
-     * @var WpAppInterface;
+     * @var WpAppInterface
      */
     protected $app;
 
