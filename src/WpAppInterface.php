@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
+use Pollen\Asset\AssetManagerInterface;
 use Pollen\Container\ContainerInterface;
 use Pollen\Cookie\CookieInterface;
 use Pollen\Cookie\CookieJarInterface;
@@ -22,10 +23,10 @@ use Pollen\Routing\RouterInterface;
 use Pollen\Support\Concerns\BootableTraitInterface;
 use Pollen\Support\Concerns\ConfigBagAwareTraitInterface;
 use Pollen\Validation\ValidatorInterface;
-use Pollen\WpApp\Post\PostQueryInterface;
-use Pollen\WpApp\Term\TermQueryInterface;
-use Pollen\WpApp\User\UserQueryInterface;
-use Pollen\WpApp\User\UserRoleManagerInterface;
+use Pollen\WpPost\WpPostQueryInterface;
+use Pollen\WpTaxonomy\WpTermQueryInterface;
+use Pollen\WpUser\WpUserQueryInterface;
+use Pollen\WpUser\WpUserRoleManagerInterface;
 use WP_Post;
 use WP_Query;
 use WP_Term;
@@ -55,6 +56,13 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
      * @return void
      */
     public function bootContainer(): void;
+
+    /**
+     * Instance du gestionnaire d'assets.
+     *
+     * @return AssetManagerInterface
+     */
+    public function asset(): AssetManagerInterface;
 
     /**
      * Instance du gestionnaire d'instance de cookies|Instance d'un cookie.
@@ -152,25 +160,25 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
      *
      * @param string|int|WP_Post|null $post
      *
-     * @return PostQueryInterface|null
+     * @return WpPostQueryInterface|null
      */
-    public function post($post = null): ?PostQueryInterface;
+    public function post($post = null): ?WpPostQueryInterface;
 
     /**
      * Liste des instances de posts courants ou associés à une requête WP_Query ou associés à une liste d'arguments.
      *
      * @param WP_Query|array|null $query
      *
-     * @return PostQueryInterface[]|array
+     * @return WpPostQueryInterface[]|array
      */
     public function posts($query = null): array;
 
     /**
      * Instance du gestionnaire de rôle utilisateurs.
      *
-     * @return UserRoleManagerInterface
+     * @return WpUserRoleManagerInterface
      */
-    public function role(): UserRoleManagerInterface;
+    public function role(): WpUserRoleManagerInterface;
 
     /**
      * Instance du gestionnaire de routage.
@@ -193,16 +201,16 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
      *
      * @param string|int|WP_Term|null $term
      *
-     * @return TermQueryInterface|null
+     * @return WpTermQueryInterface|null
      */
-    public function term($term = null): ?TermQueryInterface;
+    public function term($term = null): ?WpTermQueryInterface;
 
     /**
      * Liste des instances de termes de taxonomie associés à une requête WP_Term_Query ou une liste d'arguments.
      *
      * @param WP_Term_Query|array $query
      *
-     * @return TermQueryInterface[]|array
+     * @return WpTermQueryInterface[]|array
      */
     public function terms($query): array;
 
@@ -211,16 +219,16 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
      *
      * @param string|int|WP_User|null $id
      *
-     * @return UserQueryInterface|null
+     * @return WpUserQueryInterface|null
      */
-    public function user($id = null): ?UserQueryInterface;
+    public function user($id = null): ?WpUserQueryInterface;
 
     /**
      * Liste des instances d'utilisateurs associés à une requête WP_User_Query ou une liste d'arguments.
      *
      * @param WP_User_Query|array $query
      *
-     * @return UserQueryInterface[]|array
+     * @return WpUserQueryInterface[]|array
      */
     public function users($query): array;
 

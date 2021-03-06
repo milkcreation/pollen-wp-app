@@ -11,12 +11,12 @@ use Pollen\Support\Env;
 class Debug
 {
     /**
-     * @var WpAppInterface;
+     * @var WpAppInterface
      */
     protected $app;
 
     /**
-     * @var DebugManagerInterface;
+     * @var DebugManagerInterface
      */
     protected $debug;
 
