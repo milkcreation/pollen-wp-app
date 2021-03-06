@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Pollen\WpApp;
 
 use Exception;
+use Pollen\Asset\AssetManagerInterface;
+use Pollen\Asset\AssetServiceProvider;
 use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
 use Pollen\Cookie\CookieJarInterface;
@@ -35,17 +37,18 @@ use Pollen\Routing\RoutingServiceProvider;
 use Pollen\Routing\RouterInterface;
 use Pollen\Validation\ValidationServiceProvider;
 use Pollen\Validation\ValidatorInterface;
+use Pollen\WpApp\Asset\Asset;
 use Pollen\WpApp\Cookie\CookieJar;
 use Pollen\WpApp\Debug\Debug;
 use Pollen\WpApp\Routing\Routing;
-use Pollen\WpApp\Post\PostQuery;
-use Pollen\WpApp\Post\PostQueryInterface;
-use Pollen\WpApp\Term\TermQuery;
-use Pollen\WpApp\Term\TermQueryInterface;
-use Pollen\WpApp\User\UserQuery;
-use Pollen\WpApp\User\UserQueryInterface;
-use Pollen\WpApp\User\UserRoleManagerInterface;
-use Pollen\WpApp\User\UserServiceProvider;
+use Pollen\WpPost\WpPostQuery;
+use Pollen\WpPost\WpPostQueryInterface;
+use Pollen\WpTaxonomy\WpTermQuery;
+use Pollen\WpTaxonomy\WpTermQueryInterface;
+use Pollen\WpUser\WpUserQuery;
+use Pollen\WpUser\WpUserQueryInterface;
+use Pollen\WpUser\WpUserRoleManagerInterface;
+use Pollen\WpUser\WpUserServiceProvider;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 
@@ -65,6 +68,7 @@ class WpApp extends Container implements WpAppInterface
      * @var string[]
      */
     protected $serviceProviders = [
+        AssetServiceProvider::class,
         CookieServiceProvider::class,
         DebugServiceProvider::class,
         EncryptionServiceProvider::class,
@@ -77,7 +81,7 @@ class WpApp extends Container implements WpAppInterface
         PartialServiceProvider::class,
         RoutingServiceProvider::class,
         SessionServiceProvider::class,
-        UserServiceProvider::class,
+        WpUserServiceProvider::class,
         ValidationServiceProvider::class,
     ];
 
@@ -135,8 +139,18 @@ class WpApp extends Container implements WpAppInterface
                 }
             }
 
-            if ($this->has(DebugManagerInterface::class)) {
-                new Debug($this->get(DebugManagerInterface::class), $this);
+            try {
+                $asset = $this->asset();
+                new Asset($asset, $this);
+            } catch(RuntimeException $e) {
+                unset($e);
+            }
+
+            try {
+                $debug = $this->debug();
+                new Debug($debug, $this);
+            } catch(RuntimeException $e) {
+                unset($e);
             }
 
             try {
@@ -211,6 +225,17 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
+    public function asset(): AssetManagerInterface
+    {
+        if ($this->has(AssetManagerInterface::class)) {
+            return $this->get(AssetManagerInterface::class);
+        }
+        throw new RuntimeException('Unresolvable Asset Manager service');
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function cookie(?string $alias = null, array $args = [])
     {
         if ($this->has(CookieJarInterface::class)) {
@@ -228,10 +253,9 @@ class WpApp extends Container implements WpAppInterface
     public function debug(): DebugManagerInterface
     {
         if ($this->has(DebugManagerInterface::class)) {
-            /** @var DebugManagerInterface $encrypter */
             return $this->get(DebugManagerInterface::class);
         }
-        throw new RuntimeException('Unresolvable Encryption service');
+        throw new RuntimeException('Unresolvable Debug service');
     }
 
     /**
@@ -245,7 +269,7 @@ class WpApp extends Container implements WpAppInterface
 
             return $encrypter->decrypt($hash);
         }
-        throw new RuntimeException('Unresolvable Encryption service');
+        throw new RuntimeException('Unresolvable Encrypter service');
     }
 
     /**
@@ -259,7 +283,7 @@ class WpApp extends Container implements WpAppInterface
 
             return $encrypter->encrypt($plain);
         }
-        throw new RuntimeException('Unresolvable Encryption service');
+        throw new RuntimeException('Unresolvable Encrypter service');
     }
 
     /**
@@ -344,9 +368,9 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public function post($post = null): ?PostQueryInterface
+    public function post($post = null): ?WpPostQueryInterface
     {
-        return PostQuery::create($post);
+        return WpPostQuery::create($post);
     }
 
     /**
@@ -354,16 +378,16 @@ class WpApp extends Container implements WpAppInterface
      */
     public function posts($query = null): array
     {
-        return PostQuery::fetch($query);
+        return WpPostQuery::fetch($query);
     }
 
     /**
      * @inheritDoc
      */
-    public function role(): UserRoleManagerInterface
+    public function role(): WpUserRoleManagerInterface
     {
-        if ($this->has(UserRoleManagerInterface::class)) {
-            return $this->get(UserRoleManagerInterface::class);
+        if ($this->has(WpUserRoleManagerInterface::class)) {
+            return $this->get(WpUserRoleManagerInterface::class);
         }
         throw new RuntimeException('Unresolvable UserRole service');
     }
@@ -395,9 +419,9 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public function term($term = null): ?TermQueryInterface
+    public function term($term = null): ?WpTermQueryInterface
     {
-        return TermQuery::create($term);
+        return WpTermQuery::create($term);
     }
 
     /**
@@ -405,15 +429,15 @@ class WpApp extends Container implements WpAppInterface
      */
     public function terms($query): array
     {
-        return TermQuery::fetch($query);
+        return WpTermQuery::fetch($query);
     }
 
     /**
      * @inheritDoc
      */
-    public function user($id = null): ?UserQueryInterface
+    public function user($id = null): ?WpUserQueryInterface
     {
-        return UserQuery::create($id);
+        return WpUserQuery::create($id);
     }
 
     /**
@@ -421,7 +445,7 @@ class WpApp extends Container implements WpAppInterface
      */
     public function users($query): array
     {
-        return UserQuery::fetch($query);
+        return WpUserQuery::fetch($query);
     }
 
     /**

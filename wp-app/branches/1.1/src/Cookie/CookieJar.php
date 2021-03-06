@@ -17,7 +17,7 @@ class CookieJar
     protected $cookieJar;
 
     /**
-     * @var WpAppInterface;
+     * @var WpAppInterface
      */
     protected $app;
 
