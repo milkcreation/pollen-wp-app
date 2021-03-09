@@ -6,10 +6,10 @@ namespace Pollen\WpApp\Routing;
 
 use Pollen\Http\ResponseInterface;
 use Pollen\Support\Str;
-use Pollen\Routing\BaseController;
+use Pollen\Routing\BaseViewController;
 use Pollen\View\ViewEngine;
 
-class WpFallbackController extends BaseController
+class WpFallbackController extends BaseViewController
 {
     /**
      * Cartographie des méthodes de récupération des gabarits d'affichage
