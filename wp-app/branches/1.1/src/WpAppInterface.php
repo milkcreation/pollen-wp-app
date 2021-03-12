@@ -23,6 +23,8 @@ use Pollen\Routing\RouterInterface;
 use Pollen\Support\Concerns\BootableTraitInterface;
 use Pollen\Support\Concerns\ConfigBagAwareTraitInterface;
 use Pollen\Validation\ValidatorInterface;
+use Pollen\WpHook\WpHookerInterface;
+use Pollen\WpHook\WpHookableInterface;
 use Pollen\WpPost\WpPostQueryInterface;
 use Pollen\WpTaxonomy\WpTermQueryInterface;
 use Pollen\WpUser\WpUserQueryInterface;
@@ -125,6 +127,15 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
      * @return FormManagerInterface|FormInterface|null
      */
     public function form(?string $alias = null);
+
+    /**
+     * Récupération du gestionnaire de contenu d'accroche|Instance d'un contenu d'accroche déclaré.
+     *
+     * @param string|null $hook
+     *
+     * @return WpHookerInterface|WpHookableInterface|null
+     */
+    public function hook(?string $hook = null);
 
     /**
      * Instance du gestionnaire de journalisation|Journalisation d'un événement.

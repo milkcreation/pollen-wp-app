@@ -41,8 +41,11 @@ use Pollen\WpApp\Asset\Asset;
 use Pollen\WpApp\Cookie\CookieJar;
 use Pollen\WpApp\Debug\Debug;
 use Pollen\WpApp\Routing\Routing;
+use Pollen\WpHook\WpHookerInterface;
+use Pollen\WpHook\WpHookServiceProvider;
 use Pollen\WpPost\WpPostQuery;
 use Pollen\WpPost\WpPostQueryInterface;
+use Pollen\WpPost\WpPostServiceProvider;
 use Pollen\WpTaxonomy\WpTermQuery;
 use Pollen\WpTaxonomy\WpTermQueryInterface;
 use Pollen\WpUser\WpUserQuery;
@@ -81,8 +84,10 @@ class WpApp extends Container implements WpAppInterface
         PartialServiceProvider::class,
         RoutingServiceProvider::class,
         SessionServiceProvider::class,
-        WpUserServiceProvider::class,
         ValidationServiceProvider::class,
+        WpHookServiceProvider::class,
+        WpPostServiceProvider::class,
+        WpUserServiceProvider::class,
     ];
 
     /**
@@ -323,6 +328,21 @@ class WpApp extends Container implements WpAppInterface
             return $alias !== null ? $manager->get($alias) : $manager;
         }
         throw new RuntimeException('Unresolvable Form Manager service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hook(?string $hook = null)
+    {
+        if ($this->has(WpHookerInterface::class)) {
+            /** @var WpHookerInterface $hooker */
+            $manager = $this->get(WpHookerInterface::class);
+
+            return $hook !== null ? $manager->get($hook) : $manager;
+        }
+
+        throw new RuntimeException('Unresolvable WpHooker service');
     }
 
     /**

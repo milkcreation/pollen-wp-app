@@ -77,6 +77,8 @@ class Routing
             $urlMatcher->match();
 
             if ($request->attributes->has('_route')) {
+                $this->router->setCurrentRoute($request->attributes->get('_route'));
+
                 add_action(
                     'pre_get_posts',
                     function (WP_Query $wp_query) {
@@ -90,6 +92,7 @@ class Routing
                     },
                     0
                 );
+
                 add_action(
                     'wp',
                     function () {
@@ -102,6 +105,7 @@ class Routing
                         }
                     }
                 );
+
                 add_filter(
                     'posts_pre_query',
                     function (?array $posts, WP_Query $wp_query) {
