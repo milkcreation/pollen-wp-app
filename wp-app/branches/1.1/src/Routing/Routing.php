@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Routing;
 
-use Pollen\Http\RequestInterface;
-use Pollen\Routing\RouteInterface;
 use Pollen\Support\Proxy\HttpRequestProxy;
 use Pollen\WpApp\WpAppInterface;
 use Pollen\Routing\RouterInterface;
