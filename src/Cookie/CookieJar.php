@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollen\WpApp\Cookie;
 
 use Pollen\Cookie\CookieJarInterface;
+use Pollen\Cookie\Middleware\QueuedCookiesMiddleware;
 use Pollen\WpApp\WpAppInterface;
 use RuntimeException;
 use WP_Site;
@@ -42,7 +43,11 @@ class CookieJar
 
         try {
             $router = $this->app->router();
-            $router->middle('queued-cookies');
+            try {
+                $router->middle('queued-cookies');
+            } catch(RuntimeException $e) {
+                $router->middleware(new QueuedCookiesMiddleware($this->cookieJar));
+            }
         } catch(RuntimeException $e) {
             unset($e);
         }
