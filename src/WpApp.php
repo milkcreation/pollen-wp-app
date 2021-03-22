@@ -102,6 +102,7 @@ class WpApp extends Container implements WpAppInterface
         parent::__construct();
 
         $this->share(ContainerInterface::class, $this);
+        $this->share(WpAppInterface::class, $this);
 
         $this->setConfig($config)->boot();
 
