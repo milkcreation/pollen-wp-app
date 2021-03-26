@@ -11,6 +11,8 @@ use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
 use Pollen\Cookie\CookieJarInterface;
 use Pollen\Cookie\CookieServiceProvider;
+use Pollen\Database\DatabaseManagerInterface;
+use Pollen\Database\DatabaseServiceProvider;
 use Pollen\Debug\DebugManagerInterface;
 use Pollen\Debug\DebugServiceProvider;
 use Pollen\Encryption\EncrypterInterface;
@@ -26,6 +28,8 @@ use Pollen\Form\FormServiceProvider;
 use Pollen\Http\HttpServiceProvider;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Log\LogServiceProvider;
+use Pollen\Mail\MailManagerInterface;
+use Pollen\Mail\MailServiceProvider;
 use Pollen\Partial\PartialManagerInterface;
 use Pollen\Partial\PartialServiceProvider;
 use Pollen\Session\SessionManagerInterface;
@@ -39,7 +43,9 @@ use Pollen\Validation\ValidationServiceProvider;
 use Pollen\Validation\ValidatorInterface;
 use Pollen\WpApp\Asset\Asset;
 use Pollen\WpApp\Cookie\CookieJar;
+use Pollen\WpApp\Database\Database;
 use Pollen\WpApp\Debug\Debug;
+use Pollen\WpApp\Mail\Mail;
 use Pollen\WpApp\Routing\Routing;
 use Pollen\WpHook\WpHookerInterface;
 use Pollen\WpHook\WpHookServiceProvider;
@@ -73,6 +79,7 @@ class WpApp extends Container implements WpAppInterface
     protected $serviceProviders = [
         AssetServiceProvider::class,
         CookieServiceProvider::class,
+        DatabaseServiceProvider::class,
         DebugServiceProvider::class,
         EncryptionServiceProvider::class,
         EventServiceProvider::class,
@@ -81,6 +88,7 @@ class WpApp extends Container implements WpAppInterface
         FormServiceProvider::class,
         HttpServiceProvider::class,
         LogServiceProvider::class,
+        MailServiceProvider::class,
         PartialServiceProvider::class,
         RoutingServiceProvider::class,
         SessionServiceProvider::class,
@@ -133,6 +141,13 @@ class WpApp extends Container implements WpAppInterface
             global $locale;
             DateTime::setLocale($locale);
 
+            try {
+                $debug = $this->debug();
+                new Debug($debug, $this);
+            } catch(RuntimeException $e) {
+                unset($e);
+            }
+
             if ($this->has(SessionManagerInterface::class)) {
                 /** @var SessionManagerInterface $session */
                 $session = $this->get(SessionManagerInterface::class);
@@ -146,15 +161,8 @@ class WpApp extends Container implements WpAppInterface
             }
 
             try {
-                $asset = $this->asset();
-                new Asset($asset, $this);
-            } catch(RuntimeException $e) {
-                unset($e);
-            }
-
-            try {
-                $debug = $this->debug();
-                new Debug($debug, $this);
+                $db = $this->db();
+                new Database($db, $this);
             } catch(RuntimeException $e) {
                 unset($e);
             }
@@ -167,8 +175,22 @@ class WpApp extends Container implements WpAppInterface
             }
 
             try {
+                $asset = $this->asset();
+                new Asset($asset, $this);
+            } catch(RuntimeException $e) {
+                unset($e);
+            }
+
+            try {
                 $cookieJar = $this->cookie();
                 new CookieJar($cookieJar, $this);
+            } catch(RuntimeException $e) {
+                unset($e);
+            }
+
+            try {
+                $mailManager = $this->mail();
+                new Mail($mailManager, $this);
             } catch(RuntimeException $e) {
                 unset($e);
             }
@@ -251,6 +273,23 @@ class WpApp extends Container implements WpAppInterface
             return $alias === null ? $cookieJar : $cookieJar->make($alias, $args);
         }
         throw new RuntimeException('Unresolvable CookieJar service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function db(?string $table = null)
+    {
+        if ($this->has(DatabaseManagerInterface::class)) {
+            /** @var DatabaseManagerInterface $manager */
+            $manager = $this->get(DatabaseManagerInterface::class);
+
+            if ($table === null) {
+                return $manager;
+            }
+            return $manager->getConnection()->table($table);
+        }
+        throw new RuntimeException('Unresolvable Database service');
     }
 
     /**
@@ -370,6 +409,20 @@ class WpApp extends Container implements WpAppInterface
             return null;
         }
         throw new RuntimeException('Unresolvable Log service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function mail($mailable = null)
+    {
+        if ($this->has(MailManagerInterface::class)) {
+            /** @var MailManagerInterface $manager */
+            $manager = $this->get(MailManagerInterface::class);
+
+            return $mailable !== null ? $manager->setMailable($mailable)->getMailable() : $manager;
+        }
+        throw new RuntimeException('Unresolvable Mail service');
     }
 
     /**
