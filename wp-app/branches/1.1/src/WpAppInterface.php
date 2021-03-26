@@ -8,6 +8,7 @@ use Pollen\Asset\AssetManagerInterface;
 use Pollen\Container\ContainerInterface;
 use Pollen\Cookie\CookieInterface;
 use Pollen\Cookie\CookieJarInterface;
+use Pollen\Database\DatabaseManagerInterface;
 use Pollen\Debug\DebugManagerInterface;
 use Pollen\Event\EventDispatcherInterface;
 use Pollen\Field\FieldDriverInterface;
@@ -17,6 +18,8 @@ use Pollen\Filesystem\StorageManagerInterface;
 use Pollen\Form\FormManagerInterface;
 use Pollen\Form\FormInterface;
 use Pollen\Log\LogManagerInterface;
+use Pollen\Mail\MailableInterface;
+use Pollen\Mail\MailManagerInterface;
 use Pollen\Partial\PartialDriverInterface;
 use Pollen\Partial\PartialManagerInterface;
 use Pollen\Routing\RouterInterface;
@@ -75,6 +78,15 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
      * @return CookieJarInterface|CookieInterface
      */
     public function cookie(?string $alias = null, array $args = []);
+
+    /**
+     * Instance du gestionnaire de base de données.
+     *
+     * @param string|null $table
+     *
+     * @return DatabaseManagerInterface|\Illuminate\Database\Query\Builder
+     */
+    public function db(?string $table = null);
 
     /**
      * Instance du gestionnaire de débogage.
@@ -153,6 +165,15 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
         array $context = [],
         ?string $channel = null
     ): ?LogManagerInterface;
+
+    /**
+     * Instance du gestionnaire de mail|Instance de mail.
+     *
+     * @param MailableInterface|string|array|null $mailable
+     *
+     * @return MailManagerInterface|MailableInterface
+     */
+    public function mail($mailable = null);
 
     /**
      * Récupération du gestionnaire de portions d'affichage ou instance d'une portion d'affichage déclarée selon son
