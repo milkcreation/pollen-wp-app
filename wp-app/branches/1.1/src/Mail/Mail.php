@@ -28,21 +28,26 @@ class Mail
         $this->mailManager = $mailManager;
         $this->app = $app;
 
-        $admin_email = get_option('admin_email');
-        $admin_name = ($user = get_user_by('email', get_option('admin_email'))) ? $user->display_name : '';
 
-        $this->mailManager->setDefaults(
-            [
-                'from'    => [$admin_email, $admin_name],
-                'to'      => [$admin_email, $admin_name],
-                'charset' => get_bloginfo('charset'),
-            ]
-        );
+
+        if (!$this->mailManager->defaults('from')) {
+            $this->mailManager->defaults(['from' => $this->getAdminAddress()]);
+        }
+
+        if (!$this->mailManager->defaults('to')) {
+            $this->mailManager->defaults(['to' => $this->getAdminAddress()]);
+        }
+
+        if (!$this->mailManager->defaults('charset')) {
+            $this->mailManager->defaults(['charset' => get_bloginfo('charset')]);
+        }
 
         add_filter(
             'wp_mail_from',
-            function ($from_email) use ($admin_email, $admin_name) {
+            function ($from_email) {
                 if (preg_match('/^wordpress@/', $from_email)) {
+                    [$admin_email, $admin_name] = $this->getAdminAddress();
+
                     $from_email = $admin_email ?? $from_email;
 
                     add_filter(
@@ -55,5 +60,18 @@ class Mail
                 return $from_email;
             }
         );
+    }
+
+    /**
+     * Récupération de l'adresse de destination de l'administrateur de site.
+     *
+     * @return array
+     */
+    protected function getAdminAddress(): array
+    {
+        $admin_email = get_option('admin_email');
+        $admin_name = ($user = get_user_by('email', get_option('admin_email'))) ? $user->display_name : '';
+
+        return [$admin_email, $admin_name];
     }
 }

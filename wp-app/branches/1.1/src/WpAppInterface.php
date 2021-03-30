@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
+use Pollen\Asset\AssetInterface;
 use Pollen\Asset\AssetManagerInterface;
 use Pollen\Container\ContainerInterface;
 use Pollen\Cookie\CookieInterface;
@@ -17,6 +18,7 @@ use Pollen\Filesystem\FilesystemInterface;
 use Pollen\Filesystem\StorageManagerInterface;
 use Pollen\Form\FormManagerInterface;
 use Pollen\Form\FormInterface;
+use Pollen\Http\RequestInterface;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Mail\MailableInterface;
 use Pollen\Mail\MailManagerInterface;
@@ -32,6 +34,7 @@ use Pollen\WpPost\WpPostQueryInterface;
 use Pollen\WpTaxonomy\WpTermQueryInterface;
 use Pollen\WpUser\WpUserQueryInterface;
 use Pollen\WpUser\WpUserRoleManagerInterface;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use WP_Post;
 use WP_Query;
 use WP_Term;
@@ -65,9 +68,11 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
     /**
      * Instance du gestionnaire d'assets.
      *
-     * @return AssetManagerInterface
+     * @param string|null $name
+     *
+     * @return AssetManagerInterface|AssetInterface|null
      */
-    public function asset(): AssetManagerInterface;
+    public function asset(?string $name = null);
 
     /**
      * Instance du gestionnaire d'instance de cookies|Instance d'un cookie.
@@ -204,6 +209,20 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
      * @return WpPostQueryInterface[]|array
      */
     public function posts($query = null): array;
+
+    /**
+     * Instance de la requête HTTP PSR-7 principale.
+     *
+     * @return PsrRequest
+     */
+    public function psrRequest(): PsrRequest;
+
+    /**
+     * Instance de la requête HTTP principale.
+     *
+     * @return RequestInterface
+     */
+    public function request(): RequestInterface;
 
     /**
      * Instance du gestionnaire de rôle utilisateurs.

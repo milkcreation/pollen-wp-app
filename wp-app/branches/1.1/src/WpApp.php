@@ -26,6 +26,7 @@ use Pollen\Filesystem\StorageManagerInterface;
 use Pollen\Form\FormManagerInterface;
 use Pollen\Form\FormServiceProvider;
 use Pollen\Http\HttpServiceProvider;
+use Pollen\Http\RequestInterface;
 use Pollen\Log\LogManagerInterface;
 use Pollen\Log\LogServiceProvider;
 use Pollen\Mail\MailManagerInterface;
@@ -59,6 +60,7 @@ use Pollen\WpUser\WpUserQueryInterface;
 use Pollen\WpUser\WpUserRoleManagerInterface;
 use Pollen\WpUser\WpUserServiceProvider;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface as PsrRequest;
 use RuntimeException;
 
 class WpApp extends Container implements WpAppInterface
@@ -112,7 +114,8 @@ class WpApp extends Container implements WpAppInterface
         $this->share(ContainerInterface::class, $this);
         $this->share(WpAppInterface::class, $this);
 
-        $this->setConfig($config)->boot();
+        $this->setConfig($config);
+        $this->boot();
 
         if (!self::$instance instanceof static) {
             self::$instance = $this;
@@ -144,7 +147,7 @@ class WpApp extends Container implements WpAppInterface
             try {
                 $debug = $this->debug();
                 new Debug($debug, $this);
-            } catch(RuntimeException $e) {
+            } catch (RuntimeException $e) {
                 unset($e);
             }
 
@@ -163,35 +166,35 @@ class WpApp extends Container implements WpAppInterface
             try {
                 $db = $this->db();
                 new Database($db, $this);
-            } catch(RuntimeException $e) {
+            } catch (RuntimeException $e) {
                 unset($e);
             }
 
             try {
                 $router = $this->router();
                 new Routing($router, $this);
-            } catch(RuntimeException $e) {
+            } catch (RuntimeException $e) {
                 unset($e);
             }
 
             try {
                 $asset = $this->asset();
                 new Asset($asset, $this);
-            } catch(RuntimeException $e) {
+            } catch (RuntimeException $e) {
                 unset($e);
             }
 
             try {
                 $cookieJar = $this->cookie();
                 new CookieJar($cookieJar, $this);
-            } catch(RuntimeException $e) {
+            } catch (RuntimeException $e) {
                 unset($e);
             }
 
             try {
                 $mailManager = $this->mail();
                 new Mail($mailManager, $this);
-            } catch(RuntimeException $e) {
+            } catch (RuntimeException $e) {
                 unset($e);
             }
 
@@ -240,7 +243,8 @@ class WpApp extends Container implements WpAppInterface
                 );
             }
 
-            $bootableServiceProviders[] = $serviceProvider->setContainer($this);
+            $serviceProvider->setContainer($this);
+            $bootableServiceProviders[] = $serviceProvider;
             $this->addServiceProvider($serviceProvider);
         }
 
@@ -253,10 +257,13 @@ class WpApp extends Container implements WpAppInterface
     /**
      * @inheritDoc
      */
-    public function asset(): AssetManagerInterface
+    public function asset(?string $name = null)
     {
         if ($this->has(AssetManagerInterface::class)) {
-            return $this->get(AssetManagerInterface::class);
+            /** @var AssetManagerInterface $manager */
+            $manager = $this->get(AssetManagerInterface::class);
+
+            return $name === null ? $manager : $manager->get($name);
         }
         throw new RuntimeException('Unresolvable Asset Manager service');
     }
@@ -453,6 +460,28 @@ class WpApp extends Container implements WpAppInterface
     public function posts($query = null): array
     {
         return WpPostQuery::fetch($query);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function psrRequest(): PsrRequest
+    {
+        if ($this->has(PsrRequest::class)) {
+            return $this->get(PsrRequest::class);
+        }
+        throw new RuntimeException('Unresolvable Psr-7 Http Request service');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function request(): RequestInterface
+    {
+        if ($this->has(RequestInterface::class)) {
+            return $this->get(RequestInterface::class);
+        }
+        throw new RuntimeException('Unresolvable Http Request service');
     }
 
     /**

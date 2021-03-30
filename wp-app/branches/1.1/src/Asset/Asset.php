@@ -28,6 +28,18 @@ class Asset
         $this->asset = $asset;
         $this->app = $app;
 
+        if (!$this->asset->getBaseDir()) {
+            $this->asset->setBaseDir(ABSPATH);
+        }
+
+        if (!$this->asset->getBaseUrl()) {
+            $this->asset->setBaseUrl(site_url('/'));
+        }
+
+        if (!$this->asset->getRelPrefix()) {
+            $this->asset->setRelPrefix($this->app->request()->getRewriteBase());
+        }
+
         add_action('wp_head', function () {
             echo $this->asset->headerStyles();
             echo $this->asset->headerScripts();
