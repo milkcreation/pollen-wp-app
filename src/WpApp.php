@@ -40,8 +40,10 @@ use Pollen\Support\Concerns\ConfigBagAwareTrait;
 use Pollen\Support\DateTime;
 use Pollen\Routing\RoutingServiceProvider;
 use Pollen\Routing\RouterInterface;
+use Pollen\Support\StaticProxy;
 use Pollen\Validation\ValidationServiceProvider;
 use Pollen\Validation\ValidatorInterface;
+use Pollen\View\ViewServiceProvider;
 use Pollen\WpApp\Asset\Asset;
 use Pollen\WpApp\Cookie\CookieJar;
 use Pollen\WpApp\Database\Database;
@@ -95,6 +97,7 @@ class WpApp extends Container implements WpAppInterface
         RoutingServiceProvider::class,
         SessionServiceProvider::class,
         ValidationServiceProvider::class,
+        ViewServiceProvider::class,
         WpHookServiceProvider::class,
         WpPostServiceProvider::class,
         WpUserServiceProvider::class,
@@ -209,6 +212,8 @@ class WpApp extends Container implements WpAppInterface
     public function bootContainer(): void
     {
         $this->enableAutoWiring(true);
+
+        StaticProxy::setProxyContainer($this);
 
         $this->share('config', $this->config());
 
