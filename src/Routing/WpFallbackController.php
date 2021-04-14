@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Routing;
 
+use League\Route\Http\Exception as HttpException;
+use League\Route\Http\Exception\NotFoundException;
+use Pollen\Http\Response;
 use Pollen\Http\ResponseInterface;
 use Pollen\Support\Str;
 use Pollen\Routing\BaseViewController;
@@ -38,7 +41,20 @@ class WpFallbackController extends BaseViewController
 
     public function __invoke(): ResponseInterface
     {
-        return $this->dispatch();
+        $args = func_get_args();
+
+        if (isset($args[0]) && $args[0] instanceof HttpException && !$args[0] instanceof NotFoundException) {
+            ob_start();
+            _default_wp_die_handler($args[0]->getMessage(), get_class($args[0]), [
+                'exit' => false,
+                'code' => $args[0]->getStatusCode()
+            ]);
+            $content = ob_get_clean();
+
+            return new Response($content);
+        }
+
+        return $this->dispatch(...$args);
     }
 
     /**
@@ -48,8 +64,10 @@ class WpFallbackController extends BaseViewController
      */
     public function dispatch(): ResponseInterface
     {
+        $args = func_get_args();
+
         foreach (array_keys($this->wpTemplateTags) as $tag) {
-            if ($tag() && ($response = $this->handleTag($tag, ...func_get_args()))) {
+            if ($tag() && ($response = $this->handleTag($tag, ...$args))) {
                 return $response;
             }
         }
