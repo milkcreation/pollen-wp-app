@@ -72,69 +72,83 @@ class Routing
         if ($fallback = $this->app->config('router.fallback')) {
             $this->router->setFallback($fallback);
         }
-
-        add_action('parse_request', function () {
-            $request = $this->httpRequest();
-            $urlMatcher = new UrlMatcher($this->router, $request);
-            $urlMatcher->match();
-
-            if ($request->attributes->has('_route')) {
-                $route = $request->attributes->get('_route');
-
-                $this->router->setCurrentRoute($route);
-
-                if ($hook = $this->wpHooker()->getRouteHookable($route)) {
-                    add_action(
-                        'pre_get_posts',
-                        function (WP_Query $wp_query) use ($hook) {
-                            if (!$wp_query->is_admin && $wp_query->is_main_query()) {
-                                $wp_query->set('page_id', $hook->getId());
-                            }
-                        },
-                        0
-                    );
-                } else {
-                    add_action(
-                        'pre_get_posts',
-                        function (WP_Query $wp_query) {
-                            if (!$wp_query->is_admin && $wp_query->is_main_query()) {
-                                foreach ($this->wpQueryTag as $ct) {
-                                    $wp_query->{$ct} = false;
-                                }
-                                $wp_query->query_vars = $wp_query->fill_query_vars([]);
-                                unset($wp_query->query);
-                            }
-                        },
-                        0
-                    );
-
-                    add_action(
-                        'wp',
-                        function () {
-                            global $wp_query;
-
-                            if (!$wp_query->is_admin && $wp_query->is_main_query()) {
-                                $wp_query->is_404 = false;
-                                $wp_query->query = [];
-                                status_header(200);
-                            }
-                        }
-                    );
-
-                    add_filter(
-                        'posts_pre_query',
-                        function (?array $posts, WP_Query $wp_query) {
-                            if (!$wp_query->is_admin && $wp_query->is_main_query()) {
-                                return [];
-                            }
-                            return $posts;
-                        },
-                        10,
-                        2
-                    );
+        if (is_admin()) {
+            add_action(
+                'admin_init',
+                function () {
+                    $request = $this->httpRequest();
+                    $urlMatcher = new UrlMatcher($this->router, $request);
+                    $urlMatcher->match();
                 }
-            }
-        }, 0);
+            );
+        } else {
+            add_action(
+                'parse_request',
+                function () {
+                    $request = $this->httpRequest();
+                    $urlMatcher = new UrlMatcher($this->router, $request);
+                    $urlMatcher->match();
+
+                    if ($request->attributes->has('_route')) {
+                        $route = $request->attributes->get('_route');
+
+                        $this->router->setCurrentRoute($route);
+
+                        if ($hook = $this->wpHooker()->getRouteHookable($route)) {
+                            add_action(
+                                'pre_get_posts',
+                                function (WP_Query $wp_query) use ($hook) {
+                                    if (!$wp_query->is_admin && $wp_query->is_main_query()) {
+                                        $wp_query->set('page_id', $hook->getId());
+                                    }
+                                },
+                                0
+                            );
+                        } else {
+                            add_action(
+                                'pre_get_posts',
+                                function (WP_Query $wp_query) {
+                                    if (!$wp_query->is_admin && $wp_query->is_main_query()) {
+                                        foreach ($this->wpQueryTag as $ct) {
+                                            $wp_query->{$ct} = false;
+                                        }
+                                        $wp_query->query_vars = $wp_query->fill_query_vars([]);
+                                        unset($wp_query->query);
+                                    }
+                                },
+                                0
+                            );
+
+                            add_action(
+                                'wp',
+                                function () {
+                                    global $wp_query;
+
+                                    if (!$wp_query->is_admin && $wp_query->is_main_query()) {
+                                        $wp_query->is_404 = false;
+                                        $wp_query->query = [];
+                                        status_header(200);
+                                    }
+                                }
+                            );
+
+                            add_filter(
+                                'posts_pre_query',
+                                function (?array $posts, WP_Query $wp_query) {
+                                    if (!$wp_query->is_admin && $wp_query->is_main_query()) {
+                                        return [];
+                                    }
+                                    return $posts;
+                                },
+                                10,
+                                2
+                            );
+                        }
+                    }
+                },
+                0
+            );
+        }
 
         add_action(
             'template_redirect',
