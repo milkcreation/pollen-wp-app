@@ -4,45 +4,54 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp;
 
-use Pollen\Asset\AssetInterface;
-use Pollen\Asset\AssetManagerInterface;
 use Pollen\Container\ContainerInterface;
-use Pollen\Cookie\CookieInterface;
-use Pollen\Cookie\CookieJarInterface;
-use Pollen\Database\DatabaseManagerInterface;
-use Pollen\Debug\DebugManagerInterface;
-use Pollen\Event\EventDispatcherInterface;
-use Pollen\Field\FieldDriverInterface;
-use Pollen\Field\FieldManagerInterface;
-use Pollen\Filesystem\FilesystemInterface;
-use Pollen\Filesystem\StorageManagerInterface;
-use Pollen\Form\FormManagerInterface;
-use Pollen\Form\FormInterface;
-use Pollen\Http\RequestInterface;
-use Pollen\Log\LogManagerInterface;
-use Pollen\Mail\MailableInterface;
-use Pollen\Mail\MailManagerInterface;
-use Pollen\Partial\PartialDriverInterface;
-use Pollen\Partial\PartialManagerInterface;
-use Pollen\Routing\RouterInterface;
+use Pollen\Debug\DebugProxyInterface;
+use Pollen\Encryption\EncrypterProxyInterface;
 use Pollen\Support\Concerns\BootableTraitInterface;
 use Pollen\Support\Concerns\ConfigBagAwareTraitInterface;
-use Pollen\Validation\ValidatorInterface;
-use Pollen\WpHook\WpHookerInterface;
-use Pollen\WpHook\WpHookableInterface;
-use Pollen\WpPost\WpPostQueryInterface;
-use Pollen\WpTaxonomy\WpTermQueryInterface;
-use Pollen\WpUser\WpUserQueryInterface;
-use Pollen\WpUser\WpUserRoleManagerInterface;
-use Psr\Http\Message\ServerRequestInterface as PsrRequest;
-use WP_Post;
-use WP_Query;
-use WP_Term;
-use WP_Term_Query;
-use WP_User;
-use WP_User_Query;
+use Pollen\Support\Proxy\AssetProxyInterface;
+use Pollen\Support\Proxy\CookieProxyInterface;
+use Pollen\Support\Proxy\DbProxyInterface;
+use Pollen\Support\Proxy\EventProxyInterface;
+use Pollen\Support\Proxy\FieldProxyInterface;
+use Pollen\Support\Proxy\FormProxyInterface;
+use Pollen\Support\Proxy\HttpRequestProxyInterface;
+use Pollen\Support\Proxy\LogProxyInterface;
+use Pollen\Support\Proxy\MailProxyInterface;
+use Pollen\Support\Proxy\PartialProxyInterface;
+use Pollen\Support\Proxy\RouterProxyInterface;
+use Pollen\Support\Proxy\SessionProxyInterface;
+use Pollen\Support\Proxy\StorageProxyInterface;
+use Pollen\Support\Proxy\ValidatorProxyInterface;
+use Pollen\WpHook\WpHookerProxyInterface;
+use Pollen\WpPost\WpPostProxyInterface;
+use Pollen\WpTaxonomy\WpTaxonomyProxyInterface;
+use Pollen\WpUser\WpUserProxyInterface;
 
-interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInterface, ContainerInterface
+interface WpAppInterface extends
+    BootableTraitInterface,
+    ConfigBagAwareTraitInterface,
+    ContainerInterface,
+    AssetProxyInterface,
+    CookieProxyInterface,
+    DbProxyInterface,
+    DebugProxyInterface,
+    EncrypterProxyInterface,
+    EventProxyInterface,
+    FieldProxyInterface,
+    FormProxyInterface,
+    HttpRequestProxyInterface,
+    LogProxyInterface,
+    MailProxyInterface,
+    PartialProxyInterface,
+    RouterProxyInterface,
+    SessionProxyInterface,
+    StorageProxyInterface,
+    ValidatorProxyInterface,
+    WpHookerProxyInterface,
+    WpPostProxyInterface,
+    WpTaxonomyProxyInterface,
+    WpUserProxyInterface
 {
     /**
      * Récupération de l'instance courante.
@@ -64,229 +73,4 @@ interface WpAppInterface extends BootableTraitInterface, ConfigBagAwareTraitInte
      * @return void
      */
     public function bootContainer(): void;
-
-    /**
-     * Instance du gestionnaire d'assets.
-     *
-     * @param string|null $name
-     *
-     * @return AssetManagerInterface|AssetInterface|null
-     */
-    public function asset(?string $name = null);
-
-    /**
-     * Instance du gestionnaire d'instance de cookies|Instance d'un cookie.
-     *
-     * @param string|null $alias
-     * @param array $args
-     *
-     * @return CookieJarInterface|CookieInterface
-     */
-    public function cookie(?string $alias = null, array $args = []);
-
-    /**
-     * Instance du gestionnaire de base de données.
-     *
-     * @param string|null $table
-     *
-     * @return DatabaseManagerInterface|\Illuminate\Database\Query\Builder
-     */
-    public function db(?string $table = null);
-
-    /**
-     * Instance du gestionnaire de débogage.
-     *
-     * @return DebugManagerInterface
-     */
-    public function debug(): DebugManagerInterface;
-
-    /**
-     * Décryptage d'une chaîne de caractères.
-     *
-     * @param string $hash
-     *
-     * @return string
-     */
-    public function decrypt(string $hash): string;
-
-    /**
-     * Encryptage d'une chaîne de caractères.
-     *
-     * @param string $plain
-     *
-     * @return string
-     */
-    public function encrypt(string $plain): string;
-
-    /**
-     * Instance du répartiteur d'événements.
-     *
-     * @return EventDispatcherInterface
-     */
-    public function event(): EventDispatcherInterface;
-
-    /**
-     * Récupération du gestionnaire de champ ou instance d'un champ déclaré selon son alias.
-     *
-     * @param string|null $alias Alias de qualification|null pour l'instance du gestionnaire.
-     * @param mixed $idOrParams Identifiant de qualification|Liste des attributs de configuration.
-     * @param array $params Liste des attributs de configuration.
-     *
-     * @return FieldManagerInterface|FieldDriverInterface|null
-     */
-    public function field(?string $alias = null, $idOrParams = null, array $params = []);
-
-    /**
-     * Récupération du gestionnaire de formulaire ou instance d'un formulaire déclaré.
-     *
-     * @param string|null $alias Alias de qualification du formulaire.
-     *
-     * @return FormManagerInterface|FormInterface|null
-     */
-    public function form(?string $alias = null);
-
-    /**
-     * Récupération du gestionnaire de contenu d'accroche|Instance d'un contenu d'accroche déclaré.
-     *
-     * @param string|null $hook
-     *
-     * @return WpHookerInterface|WpHookableInterface|null
-     */
-    public function hook(?string $hook = null);
-
-    /**
-     * Instance du gestionnaire de journalisation|Journalisation d'un événement.
-     *
-     * @param string|null $message
-     * @param string|int|null $level
-     * @param array $context
-     * @param string|null $channel
-     *
-     * @return LogManagerInterface|null
-     */
-    public function log(
-        ?string $message = null,
-        $level = null,
-        array $context = [],
-        ?string $channel = null
-    ): ?LogManagerInterface;
-
-    /**
-     * Instance du gestionnaire de mail|Instance de mail.
-     *
-     * @param MailableInterface|string|array|null $mailable
-     *
-     * @return MailManagerInterface|MailableInterface
-     */
-    public function mail($mailable = null);
-
-    /**
-     * Récupération du gestionnaire de portions d'affichage ou instance d'une portion d'affichage déclarée selon son
-     * alias.
-     *
-     * @param string|null $alias Alias de qualification|null pour l'instance du gestionnaire.
-     * @param mixed $idOrParams Identifiant de qualification|Liste des attributs de configuration.
-     * @param array $params Liste des attributs de configuration.
-     *
-     * @return PartialManagerInterface|PartialDriverInterface|null
-     */
-    public function partial(?string $alias = null, $idOrParams = null, array $params = []);
-
-    /**
-     * Instance du post courant ou associé à une définition.
-     *
-     * @param string|int|WP_Post|null $post
-     *
-     * @return WpPostQueryInterface|null
-     */
-    public function post($post = null): ?WpPostQueryInterface;
-
-    /**
-     * Liste des instances de posts courants ou associés à une requête WP_Query ou associés à une liste d'arguments.
-     *
-     * @param WP_Query|array|null $query
-     *
-     * @return WpPostQueryInterface[]|array
-     */
-    public function posts($query = null): array;
-
-    /**
-     * Instance de la requête HTTP PSR-7 principale.
-     *
-     * @return PsrRequest
-     */
-    public function psrRequest(): PsrRequest;
-
-    /**
-     * Instance de la requête HTTP principale.
-     *
-     * @return RequestInterface
-     */
-    public function request(): RequestInterface;
-
-    /**
-     * Instance du gestionnaire de rôle utilisateurs.
-     *
-     * @return WpUserRoleManagerInterface
-     */
-    public function role(): WpUserRoleManagerInterface;
-
-    /**
-     * Instance du gestionnaire de routage.
-     *
-     * @return RouterInterface
-     */
-    public function router(): RouterInterface;
-
-    /**
-     * Récupération du gestionnaire des système de fichiers ou instance d'un système de fichier déclaré.
-     *
-     * @param string|null $name
-     *
-     * @return StorageManagerInterface|FilesystemInterface|null
-     */
-    public function storage(?string $name = null);
-
-    /**
-     * Instance du terme de taxonomie courant ou associé à une définition.
-     *
-     * @param string|int|WP_Term|null $term
-     *
-     * @return WpTermQueryInterface|null
-     */
-    public function term($term = null): ?WpTermQueryInterface;
-
-    /**
-     * Liste des instances de termes de taxonomie associés à une requête WP_Term_Query ou une liste d'arguments.
-     *
-     * @param WP_Term_Query|array $query
-     *
-     * @return WpTermQueryInterface[]|array
-     */
-    public function terms($query): array;
-
-    /**
-     * Instance de l'utilisateur courant ou associé à une definition.
-     *
-     * @param string|int|WP_User|null $id
-     *
-     * @return WpUserQueryInterface|null
-     */
-    public function user($id = null): ?WpUserQueryInterface;
-
-    /**
-     * Liste des instances d'utilisateurs associés à une requête WP_User_Query ou une liste d'arguments.
-     *
-     * @param WP_User_Query|array $query
-     *
-     * @return WpUserQueryInterface[]|array
-     */
-    public function users($query): array;
-
-    /**
-     * Instance du gestionnaire de validation.
-     *
-     * @return ValidatorInterface
-     */
-    public function validator(): ValidatorInterface;
 }
