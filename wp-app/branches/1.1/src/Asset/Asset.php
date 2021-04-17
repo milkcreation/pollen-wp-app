@@ -37,7 +37,7 @@ class Asset
         }
 
         if (!$this->asset->getRelPrefix()) {
-            $this->asset->setRelPrefix($this->app->request()->getRewriteBase());
+            $this->asset->setRelPrefix($this->app->httpRequest()->getRewriteBase());
         }
 
         add_action('wp_head', function () {
