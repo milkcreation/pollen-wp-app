@@ -45,10 +45,14 @@ class WpFallbackController extends BaseViewController
 
         if (isset($args[0]) && $args[0] instanceof HttpException && !$args[0] instanceof NotFoundException) {
             ob_start();
-            _default_wp_die_handler($args[0]->getMessage(), get_class($args[0]), [
-                'exit' => false,
-                'code' => $args[0]->getStatusCode()
-            ]);
+            _default_wp_die_handler(
+                $args[0]->getMessage(),
+                get_class($args[0]),
+                [
+                    'exit' => false,
+                    'code' => $args[0]->getStatusCode(),
+                ]
+            );
             $content = ob_get_clean();
 
             return new Response($content);
@@ -71,7 +75,11 @@ class WpFallbackController extends BaseViewController
                 return $response;
             }
         }
-        return $this->response('Template unavailable', 404);
+
+        if (!$response = $this->handleTag('is_404', ...$args)) {
+            $response = $this->response('Template unavailable', 404);
+        }
+        return $response;
     }
 
     /**
