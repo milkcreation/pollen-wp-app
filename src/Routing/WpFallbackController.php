@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Pollen\WpApp\Routing;
 
-use League\Route\Http\Exception as HttpException;
-use League\Route\Http\Exception\NotFoundException;
+use League\Route\Http\Exception\HttpExceptionInterface as BaseHttpExceptionInterface;
+use League\Route\Http\Exception\NotFoundException as BaseNotFoundException;
 use Pollen\Http\Response;
 use Pollen\Http\ResponseInterface;
 use Pollen\Support\Str;
 use Pollen\Routing\BaseViewController;
+use Pollen\Routing\Exception\HttpExceptionInterface;
+use Pollen\Routing\Exception\NotFoundException;
 use Pollen\View\ViewEngine;
 
 class WpFallbackController extends BaseViewController
@@ -43,19 +45,8 @@ class WpFallbackController extends BaseViewController
     {
         $args = func_get_args();
 
-        if (isset($args[0]) && $args[0] instanceof HttpException && !$args[0] instanceof NotFoundException) {
-            ob_start();
-            _default_wp_die_handler(
-                $args[0]->getMessage(),
-                get_class($args[0]),
-                [
-                    'exit' => false,
-                    'code' => $args[0]->getStatusCode(),
-                ]
-            );
-            $content = ob_get_clean();
-
-            return new Response($content);
+        if (isset($args[0]) && $args[0] instanceof BaseHttpExceptionInterface) {
+            return $this->exceptionRender(...$args);
         }
 
         return $this->dispatch(...$args);
@@ -80,6 +71,33 @@ class WpFallbackController extends BaseViewController
             $response = $this->response('Template unavailable', 404);
         }
         return $response;
+    }
+
+    /**
+     * Affichage des exceptions.
+     *
+     * @param BaseHttpExceptionInterface|HttpExceptionInterface $e
+     * @param array $args
+     * @return ResponseInterface
+     */
+    public function exceptionRender(BaseHttpExceptionInterface $e, ...$args): ResponseInterface
+    {
+        if ($e instanceof NotFoundException || $e instanceof BaseNotFoundException) {
+            return $this->dispatch(...$args);
+        }
+
+        ob_start();
+        _default_wp_die_handler(
+            $e->getMessage(),
+            $e instanceof HttpExceptionInterface ? $e->getTitle() : get_class($e),
+            [
+                'exit' => false,
+                'code' => $e->getStatusCode(),
+            ]
+        );
+        $content = ob_get_clean();
+
+        return new Response($content);
     }
 
     /**

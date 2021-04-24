@@ -40,6 +40,13 @@ class Asset
             $this->asset->setRelPrefix($this->app->httpRequest()->getRewriteBase());
         }
 
+        global $locale;
+
+        $this->asset->addGlobalJsVar('abspath', ABSPATH);
+        $this->asset->addGlobalJsVar('url', site_url('/'));
+        $this->asset->addGlobalJsVar('rel', $this->app->httpRequest()->getRewriteBase());
+        $this->asset->addGlobalJsVar('locale', $locale);
+
         add_action('wp_head', function () {
             echo $this->asset->headerStyles();
             echo $this->asset->headerScripts();
@@ -48,5 +55,17 @@ class Asset
         add_action('wp_footer', function () {
             echo $this->asset->footerScripts();
         }, 5);
+
+        add_action('admin_print_styles', function () {
+            echo $this->asset->headerStyles();
+        });
+
+        add_action('admin_print_scripts', function () {
+            echo $this->asset->headerScripts();
+        });
+
+        add_action('admin_print_footer_scripts',function () {
+            echo $this->asset->footerScripts();
+        });
     }
 }
