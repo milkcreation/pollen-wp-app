@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pollen\WpApp\Routing;
 
 use Pollen\Support\Proxy\HttpRequestProxy;
+use Pollen\WpApp\Middleware\WpAdminMiddleware;
 use Pollen\WpApp\WpAppInterface;
 use Pollen\Routing\RouterInterface;
 use Pollen\Routing\UrlMatcher;
@@ -72,6 +73,7 @@ class Routing
         if ($fallback = $this->app->config('router.fallback')) {
             $this->router->setFallback($fallback);
         }
+
         if (is_admin()) {
             add_action(
                 'admin_init',

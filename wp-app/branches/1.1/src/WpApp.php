@@ -26,8 +26,8 @@ use Pollen\Session\SessionManagerInterface;
 use Pollen\Session\SessionServiceProvider;
 use Pollen\Support\Concerns\BootableTrait;
 use Pollen\Support\Concerns\ConfigBagAwareTrait;
+use Pollen\Support\Concerns\ResourcesAwareTrait;
 use Pollen\Support\Exception\ManagerRuntimeException;
-use Pollen\Support\DateTime;
 use Pollen\Routing\RoutingServiceProvider;
 use Pollen\Support\Proxy\AssetProxy;
 use Pollen\Support\Proxy\CookieProxy;
@@ -46,11 +46,13 @@ use Pollen\Support\Proxy\ValidatorProxy;
 use Pollen\Support\StaticProxy;
 use Pollen\Validation\ValidationServiceProvider;
 use Pollen\View\ViewServiceProvider;
+use Pollen\WpApp\Date\Date;
 use Pollen\WpApp\Asset\Asset;
 use Pollen\WpApp\Cookie\CookieJar;
 use Pollen\WpApp\Database\Database;
 use Pollen\WpApp\Debug\Debug;
 use Pollen\WpApp\Mail\Mail;
+use Pollen\WpApp\Middleware\WpAdminMiddleware;
 use Pollen\WpApp\Routing\Routing;
 use Pollen\WpHook\WpHookerProxy;
 use Pollen\WpHook\WpHookServiceProvider;
@@ -67,6 +69,7 @@ class WpApp extends Container implements WpAppInterface
 {
     use BootableTrait;
     use ConfigBagAwareTrait;
+    use ResourcesAwareTrait;
     use AssetProxy;
     use CookieProxy;
     use DbProxy;
@@ -136,6 +139,8 @@ class WpApp extends Container implements WpAppInterface
         $this->share(ContainerInterface::class, $this);
         $this->share(WpAppInterface::class, $this);
 
+        $this->setResourcesBaseDir(dirname(__DIR__) . '/resources');
+
         $this->setConfig($config);
         $this->boot();
 
@@ -161,10 +166,13 @@ class WpApp extends Container implements WpAppInterface
     public function boot(): WpAppInterface
     {
         if (!$this->isBooted()) {
+            $this->add('routing.middleware.wp-admin', function () {
+                return new WpAdminMiddleware();
+            });
+
             $this->bootContainer();
 
-            global $locale;
-            DateTime::setLocale($locale);
+            new Date($this);
 
             try {
                 $debug = $this->debug();
@@ -179,6 +187,8 @@ class WpApp extends Container implements WpAppInterface
 
                 try {
                     $session->start();
+
+                    $this->httpRequest()->setSession($session->processor());
                 } catch (RuntimeException $e) {
                     unset($e);
                 }

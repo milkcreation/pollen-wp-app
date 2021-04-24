@@ -9,6 +9,7 @@ use Pollen\Debug\DebugProxyInterface;
 use Pollen\Encryption\EncrypterProxyInterface;
 use Pollen\Support\Concerns\BootableTraitInterface;
 use Pollen\Support\Concerns\ConfigBagAwareTraitInterface;
+use Pollen\Support\Concerns\ResourcesAwareTraitInterface;
 use Pollen\Support\Proxy\AssetProxyInterface;
 use Pollen\Support\Proxy\CookieProxyInterface;
 use Pollen\Support\Proxy\DbProxyInterface;
@@ -31,6 +32,7 @@ use Pollen\WpUser\WpUserProxyInterface;
 interface WpAppInterface extends
     BootableTraitInterface,
     ConfigBagAwareTraitInterface,
+    ResourcesAwareTraitInterface,
     ContainerInterface,
     AssetProxyInterface,
     CookieProxyInterface,
