@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Pollen\WpApp;
 
 use Pollen\Container\ContainerInterface;
-use Pollen\Debug\DebugProxyInterface;
-use Pollen\Encryption\EncrypterProxyInterface;
+
 use Pollen\Support\Concerns\BootableTraitInterface;
 use Pollen\Support\Concerns\ConfigBagAwareTraitInterface;
 use Pollen\Support\Concerns\ResourcesAwareTraitInterface;
 use Pollen\Support\Proxy\AssetProxyInterface;
 use Pollen\Support\Proxy\CookieProxyInterface;
 use Pollen\Support\Proxy\DbProxyInterface;
+use Pollen\Support\Proxy\DebugProxyInterface;
+use Pollen\Support\Proxy\EncrypterProxyInterface;
 use Pollen\Support\Proxy\EventProxyInterface;
 use Pollen\Support\Proxy\FieldProxyInterface;
 use Pollen\Support\Proxy\FormProxyInterface;
