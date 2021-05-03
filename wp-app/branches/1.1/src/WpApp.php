@@ -43,7 +43,7 @@ use Pollen\Support\Proxy\RouterProxy;
 use Pollen\Support\Proxy\SessionProxy;
 use Pollen\Support\Proxy\StorageProxy;
 use Pollen\Support\Proxy\ValidatorProxy;
-use Pollen\Support\StaticProxy;
+use Pollen\Support\ProxyResolver;
 use Pollen\Validation\ValidationServiceProvider;
 use Pollen\View\ViewServiceProvider;
 use Pollen\WpApp\Date\Date;
@@ -241,7 +241,7 @@ class WpApp extends Container implements WpAppInterface
     {
         $this->enableAutoWiring(true);
 
-        StaticProxy::setProxyContainer($this);
+        ProxyResolver::setContainer($this);
 
         $this->share('config', $this->config());
 
