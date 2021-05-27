@@ -6,6 +6,7 @@ namespace Pollen\WpApp;
 
 use Exception;
 use Pollen\Asset\AssetServiceProvider;
+use Pollen\Container\BootableServiceProviderInterface;
 use Pollen\Container\Container;
 use Pollen\Container\ServiceProviderInterface;
 use Pollen\Cookie\CookieServiceProvider;
@@ -58,8 +59,8 @@ use Pollen\WpHook\WpHookerProxy;
 use Pollen\WpHook\WpHookServiceProvider;
 use Pollen\WpPost\WpPostProxy;
 use Pollen\WpPost\WpPostServiceProvider;
-use Pollen\WpTaxonomy\WpTaxonomyProxy;
-use Pollen\WpTaxonomy\WpTaxonomyServiceProvider;
+use Pollen\WpTerm\WpTermProxy;
+use Pollen\WpTerm\WpTermServiceProvider;
 use Pollen\WpUser\WpUserProxy;
 use Pollen\WpUser\WpUserServiceProvider;
 use Psr\Container\ContainerInterface;
@@ -88,7 +89,7 @@ class WpApp extends Container implements WpAppInterface
     use ValidatorProxy;
     use WpHookerProxy;
     use WpPostProxy;
-    use WpTaxonomyProxy;
+    use WpTermProxy;
     use WpUserProxy;
 
     /**
@@ -121,7 +122,7 @@ class WpApp extends Container implements WpAppInterface
         ViewServiceProvider::class,
         WpHookServiceProvider::class,
         WpPostServiceProvider::class,
-        WpTaxonomyServiceProvider::class,
+        WpTermServiceProvider::class,
         WpUserServiceProvider::class,
     ];
 
@@ -277,11 +278,13 @@ class WpApp extends Container implements WpAppInterface
             }
 
             $serviceProvider->setContainer($this);
-            $bootableServiceProviders[] = $serviceProvider;
+            if ($serviceProvider instanceof BootableServiceProviderInterface) {
+                $bootableServiceProviders[] = $serviceProvider;
+            }
             $this->addServiceProvider($serviceProvider);
         }
 
-        /** @var ServiceProviderInterface $serviceProvider */
+        /** @var BootableServiceProviderInterface $serviceProvider */
         foreach ($bootableServiceProviders as $serviceProvider) {
             $serviceProvider->boot();
         }
