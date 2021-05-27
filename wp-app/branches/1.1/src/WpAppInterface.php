@@ -27,7 +27,7 @@ use Pollen\Support\Proxy\StorageProxyInterface;
 use Pollen\Support\Proxy\ValidatorProxyInterface;
 use Pollen\WpHook\WpHookerProxyInterface;
 use Pollen\WpPost\WpPostProxyInterface;
-use Pollen\WpTaxonomy\WpTaxonomyProxyInterface;
+use Pollen\WpTerm\WpTermProxyInterface;
 use Pollen\WpUser\WpUserProxyInterface;
 
 interface WpAppInterface extends
@@ -53,7 +53,7 @@ interface WpAppInterface extends
     ValidatorProxyInterface,
     WpHookerProxyInterface,
     WpPostProxyInterface,
-    WpTaxonomyProxyInterface,
+    WpTermProxyInterface,
     WpUserProxyInterface
 {
     /**
